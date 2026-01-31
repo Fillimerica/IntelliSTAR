@@ -35,6 +35,17 @@
 
 <body>
   <div id="render-frame">
+
+    <!-- Web App Version Info -->
+    <div class="regular-text" id="webappversion-text">version placeholder</div>
+    <style>
+      #webappversion-text {
+        position: fixed;
+        font-size: 24px;
+        bottom: 0px;
+      }
+    </style>
+
     <!--Nature Background image-->
     <div id="background-image" class="below-screen"></div>
 
@@ -86,35 +97,6 @@
           <div id="alert2" class="alert-container alert-text regular-text"></div>
           <div id="alert3" class="alert-container alert-text regular-text"></div>
           <div id="alert4" class="alert-container alert-text regular-text"></div>
-        </div>
-      </div>
-
-      <!-- Single Alert Page -->
-      <div id="single-alert-page" class="page-container alert-page-container">
-        <div>
-          <div class="page-title-bar alert-title-bar regular-text">ALERT</div>
-        </div>
-        <!-- Have alert text take up entire window until alert graphics are obtained -->
-        <div class="page-content-container forecast forecast-right" style="width: 100%;">
-          <div id="single-alert0" class="narrative-text regular-text"></div>
-        </div>
-      </div>
-
-      <!-- Multiple Alerts Page -->
-      <div id="multiple-alerts-page" class="page-container alert-page-container">
-        <div>
-          <div class="page-title-bar alert-title-bar regular-text">ALERTS</div>
-        </div>
-        <div class="page-content-container shaded-page-content">
-          <div class="alert-container">
-            <div id="alertx0" class="multiple-alert-text regular-text"></div>
-          </div>
-          <div class="alert-container">
-            <div id="alertx1" class="multiple-alert-text regular-text"></div>
-          </div>
-          <div class="alert-container">
-            <div id="alertx2" class="multiple-alert-text regular-text"></div>
-          </div>
         </div>
       </div>
 

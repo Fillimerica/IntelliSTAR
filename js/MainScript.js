@@ -1,3 +1,10 @@
+// The Local on the 8's Emulator
+// forked from https://github.com/qconrad/intellistar-emulator and extensively modified.
+// for my son Matthew, who loves the weather on the 8's.
+
+// Handle application versioning.
+const webAppVersion = "1.0.0";
+
 // Preset timeline sequences 
 // For music to finish without looping, sequence needs to match the total duration which is computed and set in XXXXXX_DURATION costant.
 // During execution the variable pageDuration is set to the selected sequence total duration so that appropriate music clips can be selected.
@@ -14,12 +21,20 @@ const NIGHT = [
 {name: "Beyond", subpages: [{name: "tomorrow-page", duration: 18000},{name: "tomorrow-night-page", duration: 18000},{name: "7day-page", duration: 15000}]},]
 const NIGHT_DURATION = totalDuration(NIGHT);
 
-const ALERTS = [
+const ALERTS_MORNING = [
+{name: "Alerts", subpages: [{name: "dynamic-alerts-page", duration: 6000}]},
+{name: "Now", subpages: [{name: "current-page", duration: 13000},{name: "radar-page", duration: 12000},{name: "zoomed-radar-page", duration: 12000}]},
+{name: "Today", subpages: [{name: "today-page", duration: 18000}]},
+{name: "Tonight", subpages: [{name: "tonight-page", duration: 18000}]},
+{name: "Beyond", subpages: [{name: "7day-page", duration: 15000}]},]
+const ALERTS_MORNING_DURATION = totalDuration(ALERTS_MORNING);
+
+const ALERTS_NIGHT = [
 {name: "Alerts", subpages: [{name: "dynamic-alerts-page", duration: 6000}]},
 {name: "Now", subpages: [{name: "current-page", duration: 13000},{name: "radar-page", duration: 12000},{name: "zoomed-radar-page", duration: 12000}]},
 {name: "Tonight", subpages: [{name: "tonight-page", duration: 18000}]},
 {name: "Beyond", subpages: [{name: "tomorrow-page", duration: 18000},{name: "7day-page", duration: 15000}]},]
-const ALERTS_DURATION = totalDuration(ALERTS);
+const ALERTS_NIGHT_DURATION = totalDuration(ALERTS_NIGHT);
 
 const WEEKDAY = ["SUN",  "MON", "TUES", "WED", "THU", "FRI", "SAT"];
 
@@ -61,6 +76,7 @@ return cumlativeTime;
 }
 
 window.onload = async function () {
+  getElement('webappversion-text').innerHTML = 'Web Application Version: ' + webAppVersion ;
   await CONFIG.load();
   setMainBackground();
   resizeWindow();
@@ -93,15 +109,25 @@ alerts are present */
 function scheduleTimeline(){
   console.log("Alerts Length=",alerts.length,"AlertsActive=",alertsActive);
   if(alertsActive > 0){
-    pageOrder = ALERTS;
-    pageDuration = ALERTS_DURATION;
-  }else if(isDay){
-    pageOrder = MORNING;
-    pageDuration = MORNING_DURATION;
-  }else{
-    pageOrder = NIGHT;
-    pageDuration = NIGHT_DURATION;
+    // Active alerts, decide which sequence based on forecast availability.
+    if(isDay) {
+      pageOrder = ALERTS_MORNING;
+      pageDuration = ALERTS_MORNING_DURATION;
+    }else{
+      pageOrder = ALERTS_NIGHT;
+      pageDuration = ALERTS_NIGHT_DURATION;
+    }
+  }else {
+    // No active weather alerts, decide wich non-alert sequence based on forecast availability.
+    if(isDay){
+      pageOrder = MORNING;
+      pageDuration = MORNING_DURATION;
+    }else{
+      pageOrder = NIGHT;
+      pageDuration = NIGHT_DURATION;
+    }
   }
+  // At this point pageOrder & pageDuration will be set to exactly one sequence.
   setInformation();
 }
 

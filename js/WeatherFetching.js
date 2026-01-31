@@ -65,7 +65,7 @@ function VFormat(RawNarrative) {
                  " S ":" south "," SSE ":" south south east "," SE ":" south east "," SSW ":" south south west "," SW ":" south west ",
                  " W ":" west "," WNW ":" west north west "," WSW ":" west south west "};
 //Time Zones
-  const TimeZone = {" EST ":" eastern standard time "," CST ":" central standard time "," MST ":" mountain standard time "," PST ":" pacific standard time "};
+  const TimeZone = {" EST ":" eastern standard time "," CST ":" central standard time "," MST ":" mountain standard time "," PST ":" pacific standard time "," HST ":" Hawaii standard time "};
 //Fractional Distances
   const FracDist = {" 1/4 ":" a quarter "," 1/2 ":" a half "," 3/4 ":" three quarters of a "};
 
