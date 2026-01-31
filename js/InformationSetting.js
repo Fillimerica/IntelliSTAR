@@ -108,6 +108,9 @@ function setForecast(){
 }
 
 function setOutlook(){ // Also known as 7day page
+    // TF Adjust 7-day start whether using the day or night forecast start. isDay controls.
+  var outlookStart;
+  if(isDay) {outlookStart = 0} else {outlookStart = 1};
   for (var i = 0; i < 7; i++) {
     var textElement = getElement("day" + i + "-text");
     var highElement = getElement("day" + i + "-high");
@@ -115,7 +118,7 @@ function setOutlook(){ // Also known as 7day page
     var conditionElement = getElement("day" + i + "-condition");
     var containerElement = getElement("day" + i + "-container");
     var iconElement = getElement("day" + i + "-icon");
-    var dayIndex = (new Date().getDay()+ i + 1) % 7;
+    var dayIndex = (new Date().getDay()+ i + outlookStart) % 7;
 
     var icon = new Image();
     icon.style.width = '100%';

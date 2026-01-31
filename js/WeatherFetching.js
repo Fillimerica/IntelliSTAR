@@ -105,8 +105,11 @@ function fetchForecast(){
           forecastPrecip[i] = `${n.pop}% Chance<br/> of ${n.precip_type.charAt(0).toUpperCase() + n.precip_type.substr(1).toLowerCase()}`
         }
         // 7 day outlook
+        // TF Adjust 7-day start whether using the day or night forecast start. isDay controls.
+        var outlookStart;
+        if(isDay) {outlookStart = 0} else {outlookStart = 1};
         for (var i = 0; i < 7; i++) {
-          let fc = forecasts[i+1]
+          let fc = forecasts[i+outlookStart];
           outlookHigh[i] = fc.max_temp
           outlookLow[i] = fc.min_temp
           outlookCondition[i] = (fc.day ? fc.day : fc.night).phrase_32char.split(' ').join('<br/>')

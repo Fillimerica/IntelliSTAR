@@ -6,7 +6,7 @@
 
 #timeline-container{
   height: 85px;
-  width: 1235px;
+  width: 1515px;
   position: absolute;
   top: 930px;
   left: 150px;
@@ -38,6 +38,7 @@
   left: 0px;
   overflow: hidden;
   transition: left 1s .2s;
+
 }
 
 .timeline-bar{
