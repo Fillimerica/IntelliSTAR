@@ -1,0 +1,30 @@
+.alert-title-bar{
+  background-color: #ae1d0b;
+}
+
+.alert-container{
+  overflow: hidden;
+  transition: opacity 1.5s ease, height 1.5s ease;  
+  width: 96%;
+  height: 100%;
+  opacity: 1;
+  top: -25%;
+}
+
+.alert-page-container{
+  top: 101%;
+  left: 0px;
+}
+
+.alert-text{
+  overflow-y: auto;
+  font-size: 40px;
+  padding: 20px;
+}
+
+.alert-container.hidden {
+  opacity: 0;
+  height: 0%;
+  padding: 0px;
+  /* The display: none will be set by JavaScript after the transition */
+}
