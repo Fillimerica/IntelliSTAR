@@ -17,14 +17,24 @@ window.GetTTSVoices = async function(ttsURL) {
     // Note: Async functions always return promises, not the data, so the caller also
     // needs to await or wrap in a .then function to get the final data.
     voicelist = await response.json();
- 
+
+    // Extract the voice names from the returned data.
+    switch (ttsURL) {
+      case "/pipertts": // server-side PiperTTS server
+        voicelist = Object.keys(voicelist); // parse out just the voice names from the data.
+        break;
+      case "https://basictts.com": // web-based voice data server (public)
+        voicelist = voicelist.map(voice => voice.name);
+        break;
+      default:
+        console.log('Unknown TTS Server. Voice List Format may be wrong');
+    }
+
   } catch (error) {
     console.error("GetTTSVoices Error=",error.message);
     MsgBox("GetTTSVoices Error",error.message);
     voicelist=JSON.parse('{"ERROR":"'+error.message+'"}');
   }
-
-
   return voicelist;
 }
 
@@ -32,7 +42,20 @@ window.ttsGetSpeech = async function(SpeechStr,ttsURL,voiceSelect) {
 // This function retrieves the audio speech blob from the configured tts Server
 // and returns a memory URL to the voice file.
   // Call the PiperTTS voice server to synthesize the voice.
-  const response = await fetch(ttsURL+"/speech", {
+
+  // Determine the URI to fetch based on the PiperTTS target server.
+  let ttsURI;
+  switch (ttsURL) {
+    case "/pipertts": // server-side PiperTTS server
+      ttsURI = ttsURL+"/speech";
+      break;
+    case "https://basictts.com": // web-based voice data server (public)
+      ttsURI = ttsURL +"/synthesize"
+      break;
+    default:
+      console.log('Unknown TTS Server. Unable to form ttsURI');
+  }
+  const response = await fetch(ttsURI, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({ text: SpeechStr, voice: voiceSelect }),
@@ -46,9 +69,23 @@ window.ttsGetSpeech = async function(SpeechStr,ttsURL,voiceSelect) {
     throw new Error('tts Server Response was not ok');
   }
 
-  // The API returns an audio file (e.g., WAV/OPUS binary data)
-  const audioBlob = await response.blob();
-  const audioURL = URL.createObjectURL(audioBlob);
+  // Process the web server response and create an audio URL.
+  let audioURL;
+  switch (ttsURL) {
+    case "/pipertts": // server-side PiperTTS server
+      // The Piper API returns an audio file (e.g., WAV/OPUS binary data)
+      const audioBlob = await response.blob();
+      audioURL = URL.createObjectURL(audioBlob);
+      break;
+    case "https://basictts.com": // web-based voice data server (public)
+      // The Piper API returns an audio file (e.g., WAV/OPUS binary data)
+      const data = await response.json();
+      audioURL = data.audioUrl;
+      break;
+    default:
+      console.log('Unknown TTS Server. Unable to form audioURL');
+  }
+
  return audioURL;
 
 }

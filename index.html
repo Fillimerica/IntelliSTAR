@@ -565,19 +565,14 @@
       dropdown.disabled=true;
 
       // here is where we would call the server to retrieve the voices.
-      const dataJSO = await GetTTSVoices(CONFIG.voiceURL);
-      const data = Object.keys(dataJSO); // parse out just the voice names from the data.
-      console.log("Data in check=",data);
+      const data = await GetTTSVoices(CONFIG.voiceURL);
 
-      //if the 1st key in the return array is === ERROR than an error was returned
-      if(data[0] === "ERROR") {
-        MsgBox("URL Error",dataJSO.ERROR);
-      } else {
-
+      //if the 1st key in the return array is "ERROR" then an error was returned
+      if(data[0] !== "ERROR") {
         for(let i = 0; i < data.length; i += 1) {
             let option = document.createElement("option");
             option.text = data[i];
-            option.value = data[i].toLowerCase().replace(" ", "_");
+            option.value = data[i] //.toLowerCase().replace(" ", "_");
             dropdown.add(option);
         };
         dropdown.disabled=false;

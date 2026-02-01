@@ -10,6 +10,7 @@ window.CONFIG = {
   alertsEnabled: true,
   voiceEnabled: true,
   voiceURL: "/pipertts",
+  //voiceURL: "https://basictts.com",
   voiceSelect: "",
   voiceAlertNarration: true,
   musicEnabled:true,
