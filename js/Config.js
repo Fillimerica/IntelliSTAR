@@ -1,6 +1,6 @@
 window.CONFIG = {
-  crawl: `Hi Matthew! If there was a severe weather alert, it would be scrolling here... But right now there are no active alerts so dad can say hi.`,
-  greeting: 'Matthew, this is your weather.',
+  crawl: globalConfig.general.crawlText,
+  greeting: globalConfig.general.greetingText,
   language: 'en-US', // Supported in TWC API
   countryCode: 'US', // Supported in TWC API (for postal key)
   units: 'e', // Supported in TWC API (e = English (imperial), m = Metric, h = Hybrid (UK)),
@@ -9,17 +9,12 @@ window.CONFIG = {
   locationMode: "POSTAL",
   alertsEnabled: true,
   voiceEnabled: true,
-  //voiceURL: "/pipertts",
-  voiceURL: "https://basictts.com",
+  voiceURL: "",
   voiceSelect: "",
   voiceAlertNarration: true,
   musicEnabled:true,
   musicMute:false,
-  secrets: {
-    // Possibly deprecated key: See issue #29
-    // twcAPIKey: 'd522aa97197fd864d36b418f39ebb323'
-    twcAPIKey: 'e1f10a1e78da46f5b10a1e78da96f525'
-  },
+
   isLocationValid: () => {
     // This is called from the UI dialog, where there is a combined zip/airport entrybox. 
     // Need to determine if a zip code or airport code was entered and validate it. 
@@ -121,14 +116,20 @@ window.CONFIG = {
     optYN = localStorage.getItem('voiceEnabled');
     if(optYN === "n") {optBool=false} else {optBool=true};
     document.getElementById('voiceEnabled').checked=optBool;
-    const voiceEnabled=optBool;
+    let voiceEnabled=optBool;
 
     // PiperTTS Selected Voice
     const voiceSelect = localStorage.getItem('voiceSelect');
     selElement = document.getElementById('voiceSelect');
-    selElement.disabled = !voiceEnabled;
-    await fn_voiceURLCheck(voiceSelect); // Load the dropdown with available voices from the server.
-    console.log("in Load, after voiceURLCheck. Selected voice=",selElement.value);
+    if(voiceEnabled) {
+      selElement.disabled = !voiceEnabled;
+      voiceEnabled= await fn_voiceURLCheck(voiceSelect); // Load the dropdown with available voices from the server.
+      console.log("in Load, after voiceURLCheck. Selected voice=",selElement.value);
+      // If there was an issue reaching the configured PiperTTS server, disable voice narrations.
+      if(!voiceEnabled) {
+         document.getElementById('voiceEnabled').checked=voiceEnabled;
+      }
+    }
 
     // narrateAlerts
     optYN = localStorage.getItem('alertsNarration');

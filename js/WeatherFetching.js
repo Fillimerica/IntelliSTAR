@@ -82,7 +82,7 @@ return RawNarrative;
 }
 
 function fetchForecast(){
-  fetch(`https://api.weather.com/v1/geocode/${latitude}/${longitude}/forecast/daily/10day.json?language=${CONFIG.language}&units=${CONFIG.units}&apiKey=${CONFIG.secrets.twcAPIKey}`)
+  fetch(`https://api.weather.com/v1/geocode/${latitude}/${longitude}/forecast/daily/10day.json?language=${CONFIG.language}&units=${CONFIG.units}&apiKey=${globalConfig.general.twcAPIKey}`)
     .then(function(response) {
       if (response.status !== 200) {
         console.log('forecast request error');
@@ -147,7 +147,7 @@ function fetchCurrentWeather(){
   }
   
 
-  fetch(`https://api.weather.com/v3/location/point?${location}&language=${CONFIG.language}&format=json&apiKey=${CONFIG.secrets.twcAPIKey}`)
+  fetch(`https://api.weather.com/v3/location/point?${location}&language=${CONFIG.language}&format=json&apiKey=${globalConfig.general.twcAPIKey}`)
       .then(function (response) {
           if (response.status == 404) {
               alert("Location not found!")
@@ -182,7 +182,7 @@ function fetchCurrentWeather(){
           getZipCodeFromUser();
           return;
         }
-        fetch(`https://api.weather.com/v1/geocode/${latitude}/${longitude}/observations/current.json?language=${CONFIG.language}&units=${CONFIG.units}&apiKey=${CONFIG.secrets.twcAPIKey}`)
+        fetch(`https://api.weather.com/v1/geocode/${latitude}/${longitude}/observations/current.json?language=${CONFIG.language}&units=${CONFIG.units}&apiKey=${globalConfig.general.twcAPIKey}`)
           .then(function(response) {
             if (response.status !== 200) {
               console.log("conditions request error");
