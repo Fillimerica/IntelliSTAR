@@ -1,3 +1,52 @@
+// Determine the correct PiperTTS voice client configuration and set the voiceURL
+// for the web client to use.
+window.GetVoiceURL = async function() {
+  let endpoint;
+  let voiceURL="";
+  let voiceOrder=0;
+
+  // Look through all the valid endpoints looking for an enabled one that functions
+  for (let pri = 1; pri <= globalConfig.PiperTTS.endpoints.length; pri++) {
+    endpoint = globalConfig.PiperTTS.endpoints.find(endpoint => endpoint.order === pri);
+    if(endpoint !== undefined) {
+      // Found a potential candidate. Test it.
+      if(endpoint.type === "Server") {
+        voiceURL = "/pipertts"; // Universal client endpoint for server side queries
+      } else {
+        voiceURL = endpoint.url;
+      }
+      // Try obtaining the voice list from the proposed URL. For testing only need to
+      // verify that data was returnable.
+      try {
+        console.log("SetVoiceURL Trying Target:",voiceURL);
+        const response = await fetch(voiceURL+"/voices", {method: 'GET'});
+        console.log("SetVoiceURL resp=",response.status);
+        if (!response.ok) {
+          throw new Error("SetVoiceURL: response status:"+response.status);
+        }
+
+        // now try to get the data from the request
+        voicelist = await response.json();
+        if(voicelist.ERROR != undefined) {
+          throw new Error("SetVoiceURL: VoiceList Data Error");
+        }
+
+      } catch (error) {
+        // Error from selected endpont. Try the next endpoint.
+        continue;
+      }
+      // Got here means response.ok, so found a valid endpoint. return it.
+      voiceOrder = endpoint.order;
+      break; // exit for loop
+    }
+
+  }
+  return { 
+    url: voiceURL,
+    order: voiceOrder,
+  };
+}
+
 // Handle querying the Pipertts server for the currently installed voices.
 window.GetTTSVoices = async function(ttsURL) {
 

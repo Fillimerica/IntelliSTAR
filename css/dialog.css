@@ -1,4 +1,4 @@
-@import "node_modules/open-props/open-props.min.css";
+ @import "node_modules/open-props/open-props.min.css";
  @import "node_modules/open-props/normalize.min.css";
  @import "node_modules/open-props/media.min.css";
  @import "node_modules/open-props/buttons.min.css";
@@ -13,6 +13,9 @@
  .voice-selection-options:has(select:disabled) {
 	 color: #888;
 }
+ .voice-control {
+	width:100%;
+ }
  .user {
 	 inline-size: var(--size-fluid-7);
 	 aspect-ratio: var(--ratio-square);
@@ -83,7 +86,7 @@
 	 input[type="file"] {
 		 inline-size: 100%;
 	}
-	 > svg {
+	 svg {
 		 fill: inherit;
 		 stroke: inherit;
 		 position: absolute;

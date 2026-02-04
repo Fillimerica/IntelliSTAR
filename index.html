@@ -21,6 +21,7 @@
   <link rel="stylesheet" type="text/css" href="css/updated.css">
   <link rel="stylesheet" type="text/css" href="css/weatherfetch.css"> 
   <link rel="stylesheet" type="text/css" href="css/dialog.css"> 
+  <script src="common_configuration.js"></script>
   <script src="js/Config.js"></script>
   <script src="js/PiperTTSClient.js"></script>
   <script src="js/dialog.js" type="module"></script>
@@ -36,17 +37,27 @@
 <body>
   <div id="render-frame">
 
-    <!-- Web App Version Info -->
-    <div class="regular-text" id="webappversion-text">version placeholder</div>
-    <style>
-      #webappversion-text {
-        position: fixed;
-        font-size: 24px;
-        bottom: 0px;
-      }
-    </style>
+    <div id="statusmessage-container" style="bottom: 0px;position: fixed;">
 
-    <!--Nature Background image-->
+      <!-- Web App Version Info -->
+      <div class="regular-text statusmessage-text" id="webappversion-text">version placeholder</div>
+
+      <div class="regular-text statusmessage-text"> -- </div>
+
+      <!-- Voice Server Status -->
+      <div class="regular-text statusmessage-text" id="voiceserver-text">
+        <span style="color:red">No PiperTTS voice server available.</span>
+      </div>
+      <style>
+        .statusmessage-text{
+          font-size: 24px;
+          display: inline-block;
+        }
+      </style>
+
+    </div>
+
+<!--Nature Background image-->
     <div id="background-image" class="below-screen"></div>
 
     <!-- Top Information Bar -->
@@ -558,28 +569,56 @@
     // If the url returns voices, populate the voices dropdown and enable voice selection.
     async function fn_voiceURLCheck(curVoice = "") {
       let dropdown = document.getElementById("voiceSelect");
+      let voiceURL = "";
+      let voiceOrder = 0;
+
       if(curVoice == "") {
         curVoice = dropdown.value;
       }
       dropdown.innerHTML=""; // Clear existing list.
       dropdown.disabled=true;
 
-      // here is where we would call the server to retrieve the voices.
-      const data = await GetTTSVoices(CONFIG.voiceURL);
+      // Make sure voice narration is enabled prior to checking for voices.
+      if(CONFIG.voiceEnabled) {
+        // Check that voiceURL is valid, if empty call the server validation function.
+        if(CONFIG.voiceURL === "") {
+          ({url: voiceURL, order: voiceOrder} = await GetVoiceURL());
+          // Update the on-screen version/status message with voice server status.
+          if(voiceOrder === 1) {
+            // Primary configured server found, update status message
+            document.getElementById("voiceserver-text").innerHTML = '<span style="color:green">Primary Voice Server Active</span>';
+          } else if (voiceOrder >1) {
+            // Secondary server found, update status message
+            document.getElementById("voiceserver-text").innerHTML = `<span style="color:yellow">CAUTION! Secondary Voice Server Active (Order #${voiceOrder})</span>`;
+          };
+          CONFIG.voiceURL = voiceURL;
+        }
 
-      //if the 1st key in the return array is "ERROR" then an error was returned
-      if(data[0] !== "ERROR") {
-        for(let i = 0; i < data.length; i += 1) {
-            let option = document.createElement("option");
-            option.text = data[i];
-            option.value = data[i] //.toLowerCase().replace(" ", "_");
-            dropdown.add(option);
-        };
-        dropdown.disabled=false;
-        if(!(!curVoice)) {
-          dropdown.value = curVoice; // try to restore the previous selection, if possible.
+        if(CONFIG.voiceURL === "") {
+          // if the voiceURL is still empty, no valid server can be found. Inform the user of the failure.
+          MsgBox("Voice Server Error","A valid responsive PiperTTS voice server was not reachable by this client. Voice Narration will be disabled.");
+        } else {
+          // Valid server found, get the available voices.
+
+          // here is where we would call the server to retrieve the voices.
+          const data = await GetTTSVoices(CONFIG.voiceURL);
+
+          //if the 1st key in the return array is "ERROR" then an error was returned
+          if(data[0] !== "ERROR") {
+            for(let i = 0; i < data.length; i += 1) {
+                let option = document.createElement("option");
+                option.text = data[i];
+                option.value = data[i] //.toLowerCase().replace(" ", "_");
+                dropdown.add(option);
+            };
+            dropdown.disabled=false;
+            if(!(!curVoice)) {
+              dropdown.value = curVoice; // try to restore the previous selection, if possible.
+            }
+          }
         }
       }
+      return !dropdown.disabled // Return whether the voice list was populated with values.
     }
   </script>
 
