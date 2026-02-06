@@ -1,0 +1,7 @@
+{
+  "type": "module",
+  "dependencies": {
+    "express": "^5.2.1",
+    "express-http-proxy": "^2.1.2"
+  }
+}
