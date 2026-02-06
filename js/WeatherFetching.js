@@ -1,3 +1,20 @@
+// import the global configuration
+import {globalConfig} from '../common_configuration.js';
+
+// After all the weather data has been retrieved, start the Local on the 8's playback.
+import { scheduleTimeline } from "./MainScript.js";
+
+// A note on how this module is designed.
+// Most of the weather data is fetch asynchronously and takes varying amouts of time
+// to be returned. Only after a particular weather data element is retrieved, the next element
+// is requested. The final elements are the radar pages. 
+// After all of the weather data has been obtained, then the main playback scheduler located
+// in MainScript.js is called.
+
+// Module level variables.
+var longitude;
+var latitude;
+
 function fetchAlerts(){
   var alertCrawl = "";
   var alertCSec = "";
@@ -15,27 +32,27 @@ function fetchAlerts(){
           if (data.features !== undefined) {
             for(var i = 0; i < data.features.length; i++) {
               // Initialize a new AlertObj object for each alert.
-              alerts[i] = new AlertObj;
-              alerts[i].duration = 5000; // default minimum display duration (used if not narrating)
-              alerts[i].dispText = AlertFormat("<b>"+data.features[i].properties.event + ".</b><br>" + data.features[i].properties.description).replace(/\n/g," ");
+              Weather.alerts[i] = new Weather.AlertObj;
+              Weather.alerts[i].duration = 5000; // default minimum display duration (used if not narrating)
+              Weather.alerts[i].dispText = AlertFormat("<b>"+data.features[i].properties.event + ".</b><br>" + data.features[i].properties.description).replace(/\n/g," ");
               // Set the crawl to be a constant string with all the newlines removed.
               alertCSec = AlertFormat(data.features[i].properties.event + "." + data.features[i].properties.description).replace(/\n/g," ");
               // define the spoken alert text with expanded terms so the pronunciation is correct.
-              alerts[i].speechText=VFormat(alertCSec);
+              Weather.alerts[i].speechText=VFormat(alertCSec);
               alertCrawl = alertCrawl + " " + alertCSec;
             }
             if(alertCrawl != ""){
               CONFIG.crawl = alertCrawl;
             }
-            alertsActive = data.features.length;
+            Weather.alertsActive = data.features.length;
           } else {
-            alertsActive = 0 ; // No active alerts returned.
+            Weather.alertsActive = 0 ; // No active alerts returned.
           }
           fetchForecast(); // continue getting weather data only after response is received and processed.
         });
       })
   } else {
-    alertsActive = 0; // no alerts since alerts are disabled.
+    Weather.alertsActive = 0; // no alerts since alerts are disabled.
     fetchForecast();
   }
 }
@@ -99,10 +116,10 @@ function fetchForecast(){
         ns.push(forecasts[1].night);
         for (let i = 0; i <= 3; i++) {
           let n = ns[i]
-          forecastTemp[i] = n.temp
-          forecastIcon[i] = n.icon_code
-          forecastNarrative[i] = VFormat(n.narrative)
-          forecastPrecip[i] = `${n.pop}% Chance<br/> of ${n.precip_type.charAt(0).toUpperCase() + n.precip_type.substr(1).toLowerCase()}`
+          Weather.forecastTemp[i] = n.temp
+          Weather.forecastIcon[i] = n.icon_code
+          Weather.forecastNarrative[i] = VFormat(n.narrative)
+          Weather.forecastPrecip[i] = `${n.pop}% Chance<br/> of ${n.precip_type.charAt(0).toUpperCase() + n.precip_type.substr(1).toLowerCase()}`
         }
         // 7 day outlook
         // TF Adjust 7-day start whether using the day or night forecast start. isDay controls.
@@ -110,20 +127,20 @@ function fetchForecast(){
         if(isDay) {outlookStart = 0} else {outlookStart = 1};
         for (var i = 0; i < 7; i++) {
           let fc = forecasts[i+outlookStart];
-          outlookHigh[i] = fc.max_temp
-          outlookLow[i] = fc.min_temp
-          outlookCondition[i] = (fc.day ? fc.day : fc.night).phrase_32char.split(' ').join('<br/>')
+          Weather.outlookHigh[i] = fc.max_temp
+          Weather.outlookLow[i] = fc.min_temp
+          Weather.outlookCondition[i] = (fc.day ? fc.day : fc.night).phrase_32char.split(' ').join('<br/>')
           // thunderstorm doesn't fit in the 7 day outlook boxes
           // so I multilined it similar to that of the original
-          outlookCondition[i] = outlookCondition[i].replace("Thunderstorm", "Thunder</br>storm");
-          outlookIcon[i] = (fc.day ? fc.day : fc.night).icon_code
+          Weather.outlookCondition[i] = Weather.outlookCondition[i].replace("Thunderstorm", "Thunder</br>storm");
+          Weather.outlookIcon[i] = (fc.day ? fc.day : fc.night).icon_code
         }
         fetchRadarImages();
       })
     })
 }
 
-function fetchCurrentWeather(){
+export function fetchCurrentWeather(){
 
   //Let's check what we're dealing with
   let location = "";
@@ -191,18 +208,18 @@ function fetchCurrentWeather(){
             response.json().then(function(data) {
               // cityName is set in the above fetch call and not this one
               let unit = data.observation[CONFIG.unitField];
-              currentTemperature = Math.round(unit.temp);
-              currentCondition = data.observation.phrase_32char;
-              windSpeed = `${data.observation.wdir_cardinal} ${unit.wspd} ${CONFIG.units === 'm' ? 'km/h' : 'mph'}`;
-              gusts = unit.gust || 'NONE';
-              feelsLike = unit.feels_like
-              visibility = Math.round(unit.vis)
-              humidity = unit.rh
-              dewPoint = unit.dewpt
-              pressure = unit.altimeter.toPrecision(4);
+              Weather.currentTemperature = Math.round(unit.temp);
+              Weather.currentCondition = data.observation.phrase_32char;
+              Weather.windSpeed = `${data.observation.wdir_cardinal} ${unit.wspd} ${CONFIG.units === 'm' ? 'km/h' : 'mph'}`;
+              Weather.gusts = unit.gust || 'NONE';
+              Weather.feelsLike = unit.feels_like
+              Weather.visibility = Math.round(unit.vis)
+              Weather.humidity = unit.rh
+              Weather.dewPoint = unit.dewpt
+              Weather.pressure = unit.altimeter.toPrecision(4);
               let ptendCode = data.observation.ptend_code
-              pressureTrend = (ptendCode == 1 || ptendCode == 3) ? '▲' : ptendCode == 0 ? '' : '▼'; // if ptendCode == 1 or 3 (rising/rising rapidly) up arrow else its steady then nothing else (falling (rapidly)) down arrow
-              currentIcon = data.observation.icon_code
+              Weather.pressureTrend = (ptendCode == 1 || ptendCode == 3) ? '▲' : ptendCode == 0 ? '' : '▼'; // if ptendCode == 1 or 3 (rising/rising rapidly) up arrow else its steady then nothing else (falling (rapidly)) down arrow
+              Weather.currentIcon = data.observation.icon_code
               fetchAlerts();
             });
           });
@@ -213,8 +230,10 @@ function fetchCurrentWeather(){
 }
 
 function fetchRadarImages(){
-  radarImage = document.createElement("iframe");
-  radarImage.onerror = function () {
+  var mapSettings;
+
+  Weather.radarImage = document.createElement("iframe");
+  Weather.radarImage.onerror = function () {
     getElement('radar-container').style.display = 'none';
   }
 
@@ -241,24 +260,24 @@ function fetchRadarImages(){
       "national": 0.6
     }
   }));
-  radarImage.setAttribute("src", "https://radar.weather.gov/?settings=v1_" + mapSettings);
-  radarImage.style.width = "1230px"
-  radarImage.style.height = "740px"
-  radarImage.style.marginTop = "-220px"
-  radarImage.style.overflow = "hidden"
+  Weather.radarImage.setAttribute("src", "https://radar.weather.gov/?settings=v1_" + mapSettings);
+  Weather.radarImage.style.width = "1230px"
+  Weather.radarImage.style.height = "740px"
+  Weather.radarImage.style.marginTop = "-220px"
+  Weather.radarImage.style.overflow = "hidden"
 
-  if(alertsActive == -1) {
+  if(Weather.alertsActive == -1) {
     console.log("TIMING ERROR!! In radar page aquisition and alert status is undefined!");
   }
   
-  if(alertsActive> 0){
-    zoomedRadarImage = new Image();
-    zoomedRadarImage.onerror = function () {
+  if(Weather.alertsActive> 0){
+    Weather.zoomedRadarImage = new Image();
+    Weather.zoomedRadarImage.onerror = function () {
       getElement('zoomed-radar-container').style.display = 'none';
     }
 
-    zoomedRadarImage = document.createElement("iframe");
-    zoomedRadarImage.onerror = function () {
+    Weather.zoomedRadarImage = document.createElement("iframe");
+    Weather.zoomedRadarImage.onerror = function () {
       getElement('zoomed-radar-container').style.display = 'none';
     }
   
@@ -285,12 +304,13 @@ function fetchRadarImages(){
         "national": 0.6
       }
     }));
-    zoomedRadarImage.setAttribute("src", "https://radar.weather.gov/?settings=v1_" + mapSettings);
-    zoomedRadarImage.style.width = "1230px"
-    zoomedRadarImage.style.height = "740px"
-    zoomedRadarImage.style.marginTop = "-220px"
-    zoomedRadarImage.style.overflow = "hidden"
+    Weather.zoomedRadarImage.setAttribute("src", "https://radar.weather.gov/?settings=v1_" + mapSettings);
+    Weather.zoomedRadarImage.style.width = "1230px"
+    Weather.zoomedRadarImage.style.height = "740px"
+    Weather.zoomedRadarImage.style.marginTop = "-220px"
+    Weather.zoomedRadarImage.style.overflow = "hidden"
   }
-
-  scheduleTimeline();
+  // Radar is the last in a string of weather elements to obtain.
+  // After all the weather data is obtained, start the visual playback sequence.
+  scheduleTimeline(); // Start the Local on the 8's main sequencer.
 }

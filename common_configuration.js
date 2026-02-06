@@ -1,7 +1,7 @@
 // This is the common configuration file for the IntelliSTAR Local onm the 8's Emulator
 // Edit this file to set default configuration for operation.
 // See the comments for each section for details.
-const globalConfig = {
+export const globalConfig = {
 
 general: {
     // General default configuration items.
@@ -46,7 +46,7 @@ PiperTTS: {
     //      A simple diagnostic test is to try to reach the url/voices with a browser on the corresponding source. A list of available
     //      narration voices should be returned if the PiperTTS server is reachable.
     endpoints: [
-        {order:1, type: "Server", url:"localhost:5000"},
+        {order:1, type: "Server", url:"http://localhost:5000"},
         {order:0, type: "Server", url:"someuser.pythonanywhere.com"},
         {order:0, type: "Client", url:"someuser.pythonanywhere.com"},
         {order:2, type: "Client", url:"https://basictts.com"},

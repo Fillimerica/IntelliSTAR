@@ -1,4 +1,7 @@
-function setGreetingPage(){
+// Import parent variables manipulated in this module.
+import { pageOrder } from "./MainScript.js";
+
+export function setGreetingPage(){
   getElement("hello-location-text").innerHTML = cityName + ",";
 
   // City and Airport names can be long, so rather than truncate the text,
@@ -17,7 +20,7 @@ function setGreetingPage(){
   getElement("crawl-text").innerHTML = CONFIG.crawl;
 }
 
-function setTimelineEvents(){
+export function setTimelineEvents(){
   var eventContainer = getElement('timeline-event-container');
   var progreessBarStack = getElement('progress-stack');
   for(var i = 0; i < pageOrder.length; i++){
@@ -36,16 +39,16 @@ function setTimelineEvents(){
   }
 }
 
-function setCurrentConditions(){
-  getElement('cc-condition').innerHTML = currentCondition;
-  getElement('cc-wind').innerHTML = windSpeed;
-  getElement('cc-gusts').innerHTML = gusts;
-  getElement('cc-feelslike').innerHTML = feelsLike;
-  getElement('cc-pressuretrend').innerHTML = pressureTrend;
-  getElement('ccicon').href.baseVal = 'assets/icons/conditions/' + currentIcon +'.svg';
+export function setCurrentConditions(){
+  getElement('cc-condition').innerHTML = Weather.currentCondition;
+  getElement('cc-wind').innerHTML = Weather.windSpeed;
+  getElement('cc-gusts').innerHTML = Weather.gusts;
+  getElement('cc-feelslike').innerHTML = Weather.feelsLike;
+  getElement('cc-pressuretrend').innerHTML = Weather.pressureTrend;
+  getElement('ccicon').href.baseVal = 'assets/icons/conditions/' + Weather.currentIcon +'.svg';
 }
 
-function createLogoElements(){
+export function createLogoElements(){
   var alreadyAddedLogos = [];
   for(var p = 0; p < pageOrder.length; p++){
     for (var s = 0; s < pageOrder[p].subpages.length; s++) {
@@ -67,7 +70,7 @@ function createLogoElements(){
 }
 
 // This is the invidual day stuff (Today, Tomorrow, etc.)
-function setForecast(){
+export function setForecast(){
   // Store all the needed elements as arrays so that they can be referenced in loops
   var forecastNarrativeElement=
     [getElement("today-narrative-text"),
@@ -94,20 +97,20 @@ function setForecast(){
      getElement("tomorrow-night-forecast-precip")];
 
   for (var i = 0; i < 4; i++) {
-    forecastNarrativeElement[i].innerHTML = forecastNarrative[i];
-    forecastTempElement[i].innerHTML = forecastTemp[i];
-    forecastPrecipElement[i].innerHTML = forecastPrecip[i];
+    forecastNarrativeElement[i].innerHTML = Weather.forecastNarrative[i];
+    forecastTempElement[i].innerHTML = Weather.forecastTemp[i];
+    forecastPrecipElement[i].innerHTML = Weather.forecastPrecip[i];
 
     var icon = new Image();
     icon.style.width = '100%';
     icon.style.height = '100%';
-    icon.src = 'assets/icons/conditions/' + forecastIcon[i] +'.svg';
+    icon.src = 'assets/icons/conditions/' + Weather.forecastIcon[i] +'.svg';
     forecastIconElement[i].innerHTML = '';
     forecastIconElement[i].appendChild(icon);
   }
 }
 
-function setOutlook(){ // Also known as 7day page
+export function setOutlook(){ // Also known as 7day page
     // TF Adjust 7-day start whether using the day or night forecast start. isDay controls.
   var outlookStart;
   if(isDay) {outlookStart = 0} else {outlookStart = 1};
@@ -123,7 +126,7 @@ function setOutlook(){ // Also known as 7day page
     var icon = new Image();
     icon.style.width = '100%';
     icon.style.height = '100%';
-    icon.src = 'assets/icons/conditions/' + outlookIcon[i] +'.svg';
+    icon.src = 'assets/icons/conditions/' + Weather.outlookIcon[i] +'.svg';
     iconElement.innerHTML = '';
     iconElement.appendChild(icon);
 
@@ -134,25 +137,25 @@ function setOutlook(){ // Also known as 7day page
     }
     textElement.innerHTML = WEEKDAY[dayIndex];
 
-    highElement.innerHTML = outlookHigh[i];
-    lowElement.innerHTML = outlookLow[i];
-    conditionElement.innerHTML = outlookCondition[i];
+    highElement.innerHTML = Weather.outlookHigh[i];
+    lowElement.innerHTML = Weather.outlookLow[i];
+    conditionElement.innerHTML = Weather.outlookCondition[i];
   }
 }
 
-function setAlertPage(){
-  if(alerts.length === 0)
+export function setAlertPage(){
+  if(Weather.alerts.length === 0)
     return;
 
-  for(var i = 0; i < Math.min(4, alerts.length); i++){
+  for(var i = 0; i < Math.min(4, Weather.alerts.length); i++){
     var idName = 'alert' + i;
-    getElement(idName).innerHTML = alerts[i].dispText;
+    getElement(idName).innerHTML = Weather.alerts[i].dispText;
   }
 }
 
 /* Because the first page always animates in from bottom, check if
    current page is first and set either left or top to 0px. */
-function setInitialPositionCurrentPage(){
+export function setInitialPositionCurrentPage(){
   if(pageOrder[0].subpages[0].name == 'current-page'){
     getElement('current-page').style.left = '0px';
   }
@@ -161,7 +164,7 @@ function setInitialPositionCurrentPage(){
   }
 }
 
-function getPageLogoFileName(subPageName){
+export function getPageLogoFileName(subPageName){
   switch (subPageName) {
     case "dynamic-alerts-page":
       return "8logo.svg";

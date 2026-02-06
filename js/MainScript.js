@@ -3,7 +3,16 @@
 // for my son Matthew, who loves the weather on the 8's.
 
 // Handle application versioning.
-const webAppVersion = "1.0.0";
+const webAppVersion = "1.1.0";
+
+// import the global configuration
+import {globalConfig} from '../common_configuration.js';
+
+// import the InformationSetting functions.
+import {
+  setGreetingPage,setTimelineEvents,setCurrentConditions,createLogoElements,
+  setForecast,setOutlook,setAlertPage,setInitialPositionCurrentPage,getPageLogoFileName
+} from './InformationSetting.js';
 
 // Preset timeline sequences 
 // For music to finish without looping, sequence needs to match the total duration which is computed and set in XXXXXX_DURATION costant.
@@ -36,7 +45,7 @@ const ALERTS_NIGHT = [
 {name: "Beyond", subpages: [{name: "tomorrow-page", duration: 18000},{name: "7day-page", duration: 15000}]},]
 const ALERTS_NIGHT_DURATION = totalDuration(ALERTS_NIGHT);
 
-const WEEKDAY = ["SUN",  "MON", "TUES", "WED", "THU", "FRI", "SAT"];
+//const WEEKDAY = ["SUN",  "MON", "TUES", "WED", "THU", "FRI", "SAT"];
 
 const jingle = new Audio("assets/music/jingle.wav");
 
@@ -51,10 +60,10 @@ const endScreenDelay = 5000; //time to hold in ms.
 //TF Implement feeding zip code on URL as ?zip=nnnnn
 const urlParams = new URLSearchParams(window.location.search);
 
-var isDay = true;
+// isDay = true;
 var currentLogo;
 var currentLogoIndex = 0;
-var pageOrder;
+export var pageOrder;
 var pageDuration;
 var music;
 var alertmusic;
@@ -106,9 +115,9 @@ function preLoadMusic(){
 // Called from WeatherFetching after all weather data has been received and processed.
 /* Set the timeline page order depending on time of day and if
 alerts are present */
-function scheduleTimeline(){
-  console.log("Alerts Length=",alerts.length,"AlertsActive=",alertsActive);
-  if(alertsActive > 0){
+export function scheduleTimeline(){
+  console.log("Alerts Length=",Weather.alerts.length,"Weather.alertsActive=",Weather.alertsActive);
+  if(Weather.alertsActive > 0){
     // Active alerts, decide which sequence based on forecast availability.
     if(isDay) {
       pageOrder = ALERTS_MORNING;
@@ -147,7 +156,6 @@ function setInformation(){
   setKbdShortcuts("enable");
   setGreetingPage();
   preLoadMusic();
-  checkStormMusic();
   setAlertPage();
   setForecast();
   setOutlook();
@@ -159,12 +167,6 @@ function setInformation(){
 
 function setMainBackground(){
   getElement('background-image').style.backgroundImage = 'url(https://picsum.photos/1920/1080/?random';
-}
-
-function checkStormMusic(){
-  if(currentCondition.toLowerCase().includes("storm")){
-    music= new Audio("assets/music/storm-68.wav");
-  }
 }
 
 function startAnimation(){
@@ -199,25 +201,25 @@ async function loadAlertVoices() {
   var AlertDuration=0;
   const curPageDuration=pageOrder[0].subpages[0].duration;
 
-  if (alertsActive < 1) {return}; // no active alerts, return no modifications.
+  if (Weather.alertsActive < 1) {return}; // no active alerts, return no modifications.
 
-  for (let i = 0; i < alerts.length; i++) { 
+  for (let i = 0; i < Weather.alerts.length; i++) { 
     // Only need to compute the actual speaking duration if the alert is narrated,
     // otherwise use the default duration provided in WeatherFetching.
     if (CONFIG.voiceAlertNarration) {
-      alerts[i].URL = await ttsGetSpeech(alerts[i].speechText,CONFIG.voiceURL,CONFIG.voiceSelect);
-      console.log(`AV # ${i}= `+alerts[i].URL);
-      await getAudioDuration(alerts[i].URL)
+      Weather.alerts[i].URL = await ttsGetSpeech(Weather.alerts[i].speechText,CONFIG.voiceURL,CONFIG.voiceSelect);
+      console.log(`AV # ${i}= `+Weather.alerts[i].URL);
+      await getAudioDuration(Weather.alerts[i].URL)
       .then(duration => {
           console.log('The duration of the voice is: ' + duration + ' seconds');
-          alerts[i].duration = (duration*1000)+cAlertTimePadding;
+          Weather.alerts[i].duration = (duration*1000)+cAlertTimePadding;
 
       })
       .catch(error => {
           console.error('Error getting audio duration:', error);
       });
     }
-    AlertDuration = AlertDuration + alerts[i].duration;
+    AlertDuration = AlertDuration + Weather.alerts[i].duration;
   }
   console.log(`Total Alert Duration= ${AlertDuration} ms`);
   pageOrder[0].subpages[0].duration = curPageDuration + AlertDuration; // return total alert duration in ms
@@ -233,7 +235,7 @@ function startMusic(){
 
 
 async function speechStartAlert(alertIndex) {
-  console.log("Alert narration start. Index: ",alertIndex," Duration=",alerts[alertIndex].duration);
+  console.log("Alert narration start. Index: ",alertIndex," Duration=",Weather.alerts[alertIndex].duration);
   // Duck the music for the narration. Either mute or reduce the volume of the background music.
   if(CONFIG.musicMute) {
     alertmusic.muted = true;
@@ -241,9 +243,9 @@ async function speechStartAlert(alertIndex) {
     alertmusic.volume=0.1;
   }
 
-  speech.src = alerts[alertIndex].URL;
+  speech.src = Weather.alerts[alertIndex].URL;
   speech.play();
-  speech.onended = () => speechEndAlert(alerts[alertIndex].URL);
+  speech.onended = () => speechEndAlert(Weather.alerts[alertIndex].URL);
 };
 
 async function speechStart(SpeechStr) {
@@ -343,7 +345,7 @@ async function clearGreetingPage(){
 
   // If alerts are active, make sure the duration calculation has completed
   // prior to trying to schedule the page sequence.
-  if(alertsActive > 0) {
+  if(Weather.alertsActive > 0) {
     while (!voiceAlertDurationCalc) {
       console.log("Waiting for voice Alert Duration Calculation Completion..");
       await delay(1000); 
@@ -355,7 +357,7 @@ async function clearGreetingPage(){
   revealTimeline();
   // If no alerts then start the background music now. If alerts are active
   // then the music will be controlled by the alerts system.
-  if(alertsActive == 0) {
+  if(Weather.alertsActive == 0) {
     startMusic();
   }
   setTimeout(showCrawl, 3000);
@@ -381,10 +383,10 @@ function schedulePages(){
     }
   }
   // Handle the dynamic weather alerts. Schedule the page transition and narration events.
-  if(alertsActive > 0) {
+  if(Weather.alertsActive > 0) {
     cumlativeTime = 0;
-    for (var i = 0; i < alertsActive; i++){
-      cumlativeTime = cumlativeTime + alerts[i].duration;
+    for (var i = 0; i < Weather.alertsActive; i++){
+      cumlativeTime = cumlativeTime + Weather.alerts[i].duration;
       setTimeout(execAlerts, cumlativeTime, (i+1));
     }
   }
@@ -394,7 +396,7 @@ function schedulePages(){
 // and the cutover from the alert storm music to the regular music.
 function execAlerts(alertIndex) {
   // Check and handle the last alert ending.
-  if (alertIndex === alertsActive) {
+  if (alertIndex === Weather.alertsActive) {
     if (CONFIG.musicEnabled) {
       alertmusic.pause();
       music.volume=1.0; // resume the normal background music volume.
@@ -464,8 +466,8 @@ function executePage(pageIndex, subPageIndex){
     speechStart("These are the current conditions.");    
     setTimeout(loadCC, 1000);
     setTimeout(scrollCC, currentSubPageDuration / 2);
-    //animateValue('cc-temperature-text', -20, currentTemperature, 2500, 1); // handled in animateDialFill
-    animateDialFill('cc-dial', currentTemperature, 5000);
+    //animateValue('cc-temperature-text', -20, Weather.currentTemperature, 2500, 1); // handled in animateDialFill
+    animateDialFill('cc-dial', Weather.currentTemperature, 5000);
   }
   else if(currentSubPageName == 'radar-page'){
     startRadar();
@@ -476,16 +478,16 @@ function executePage(pageIndex, subPageIndex){
     speechStart("and here is the Local Radar.");    
   }
   else if(currentSubPageName == "today-page"){
-    speechStart("Today. "+forecastNarrative[0]);    
+    speechStart("Today. "+Weather.forecastNarrative[0]);    
   }
   else if(currentSubPageName == "tonight-page"){
-    speechStart(" tonight. "+forecastNarrative[1]);    
+    speechStart(" tonight. "+Weather.forecastNarrative[1]);    
   }
   else if(currentSubPageName == "tomorrow-page"){
-    speechStart("Tomorrow. "+forecastNarrative[2]);    
+    speechStart("Tomorrow. "+Weather.forecastNarrative[2]);    
   }
   else if(currentSubPageName == "tomorrow-night-page"){
-    speechStart("Tomorrow Night. "+forecastNarrative[3]);    
+    speechStart("Tomorrow Night. "+Weather.forecastNarrative[3]);    
   }
   else if(currentSubPageName == "7day-page"){
     speechStart("Here is your seven day outlook.");    
@@ -528,11 +530,11 @@ function resetProgressBar(){
 }
 
 function startRadar(){
-  getElement('radar-container').appendChild(radarImage);
+  getElement('radar-container').appendChild(Weather.radarImage);
 }
 
 function startZoomedRadar(){
-  getElement('zoomed-radar-container').appendChild(zoomedRadarImage);
+  getElement('zoomed-radar-container').appendChild(Weather.zoomedRadarImage);
 }
 
 function stopRadar(){
@@ -541,11 +543,11 @@ function stopRadar(){
   let radarCont;
   radarCont = getElement('radar-container')
   if (radarCont.querySelector('iframe')) {
-    radarCont.removeChild(radarImage);
+    radarCont.removeChild(Weather.radarImage);
   }
   radarCont = getElement('zoomed-radar-container')
   if (radarCont.querySelector('iframe')) {
-    radarCont.removeChild(zoomedRadarImage);
+    radarCont.removeChild(Weather.zoomedRadarImage);
   }
 }
 
@@ -562,8 +564,8 @@ function scrollCC(){
     ccElements[i].style.top = '-80px';
   }
   // Split decimal into 2 objects so that we can animate them individually.
-  var pressureArray = pressure.toString().split('.');
-  animateValue("cc-visibility", 0, visibility, 800, 1);
+  var pressureArray = Weather.pressure.toString().split('.');
+  animateValue("cc-visibility", 0, Weather.visibility, 800, 1);
   if(CONFIG.units != 'm') {
       getElement("cc-visibility-unit-metric").style.fontSize = "0px";		//Doing the work twice, for good reason: if we simply hide it, the spacing left by the word still exists; if we simply set the size to zero, then it might still be visible at extreme zoom levels.
       getElement("cc-visibility-unit-metric").style.visibility = "hidden";
@@ -571,8 +573,8 @@ function scrollCC(){
       getElement("cc-visibility-unit-imperial").style.fontSize = "0px";
       getElement("cc-visibility-unit-imperial").style.visibility = "hidden";
   }
-  animateValue("cc-humidity", 0, humidity, 1000, 1);
-  animateValue("cc-dewpoint", 0, dewPoint, 1200, 1);
+  animateValue("cc-humidity", 0, Weather.humidity, 1000, 1);
+  animateValue("cc-dewpoint", 0, Weather.dewPoint, 1200, 1);
   if (CONFIG.units === 'e') {		//Imperial units.
     animateValue("cc-pressure1", 0, pressureArray[0], 1400, 1);
     animateValue("cc-pressure2", 0, pressureArray[1], 1400, 2);
@@ -648,7 +650,7 @@ function clearElements(){
 }
 
 function showEnding(){
-  if(alerts.length > 0){
+  if(Weather.alerts.length > 0){
     stayUpdated();
   }
   else{
@@ -867,7 +869,7 @@ function resizeWindow(){
   getElement('render-frame').style.transform = 'scale(' + newScale + ',' +  newScale + ')';
 }
 
-function getElement(id){
+globalThis.getElement = function(id){
   return document.getElementById(id);
 }
 

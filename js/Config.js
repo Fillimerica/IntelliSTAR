@@ -1,3 +1,20 @@
+// import the global configuration
+import { globalConfig } from "../common_configuration.js";
+
+// import the function to get the weather and start the playback sequence.
+import {fetchCurrentWeather } from "./WeatherFetching.js";
+
+// Applicationwide Global Definitions.
+(function(win){
+  win.zipCode = "";
+  win.airportCode= "";
+  win.cityName = "";
+
+  win.WEEKDAY = ["SUN",  "MON", "TUES", "WED", "THU", "FRI", "SAT"];
+  win.isDay = true;
+}(window));
+
+
 window.CONFIG = {
   crawl: globalConfig.general.crawlText,
   greeting: globalConfig.general.greetingText,
@@ -18,7 +35,7 @@ window.CONFIG = {
   isLocationValid: () => {
     // This is called from the UI dialog, where there is a combined zip/airport entrybox. 
     // Need to determine if a zip code or airport code was entered and validate it. 
-    const usertext = document.getElementById('usertext').value;
+    const usertext = getElement('usertext').value;
     let isValid = false;
 
     // See if it is a zip code. (exactly 5 digits)
@@ -50,25 +67,25 @@ window.CONFIG = {
       }
 
       // Handle user specified custom greeting.
-      cGreetMsg=getElement('customGreeting').value;
+      const cGreetMsg=getElement('customGreeting').value;
       if (cGreetMsg.length>0) {
         CONFIG.greeting=cGreetMsg;
       }
 
       // Handle the voice narration options.
-      CONFIG.voiceEnabled=document.getElementById('voiceEnabled').checked;
-      CONFIG.voiceSelect=document.getElementById('voiceSelect').value;
+      CONFIG.voiceEnabled=getElement('voiceEnabled').checked;
+      CONFIG.voiceSelect=getElement('voiceSelect').value;
       console.log("in run, Selected voice=",CONFIG.voiceSelect);
-      CONFIG.voiceAlertNarration=document.getElementById('alertsNarration').checked;
+      CONFIG.voiceAlertNarration=getElement('alertsNarration').checked;
 
       // Handle Background Music.
-      CONFIG.musicEnabled = document.getElementById('musicEnabled').checked;
+      CONFIG.musicEnabled = getElement('musicEnabled').checked;
 
       // Handle Apple Mobile Device Workaround (mute instead of volume change for background music)
-      CONFIG.musicMute = document.getElementById('appleWorkaround').checked;
+      CONFIG.musicMute = getElement('appleWorkaround').checked;
 
       // Handle Including Alerts (watches, warnings, advisories) in the sequence.
-      CONFIG.alertsEnabled = document.getElementById('alertsEnabled').checked;
+      CONFIG.alertsEnabled = getElement('alertsEnabled').checked;
 
       // Units Selection
       CONFIG.units = document.querySelector('input[name="input-units"]:checked').value;
@@ -77,7 +94,7 @@ window.CONFIG = {
       getElement("weatherfetch-text").innerHTML = wfText;
       getElement('weatherfetch-container').classList.add("shown");
       getElement('weatherfetch-text').classList.add('extend');
-      fetchCurrentWeather();
+      fetchCurrentWeather();  // Get the weather data from online sources.
       result=true;
     }
     return result;
@@ -87,12 +104,12 @@ window.CONFIG = {
 
     // zip or airport code.
     const usertext = localStorage.getItem('usertext');
-    document.getElementById('usertext').value=usertext;
+    getElement('usertext').value=usertext;
 
     // alertsEnabled 
     optYN = localStorage.getItem('alertsEnabled');
     if(optYN === "n") {optBool=false} else {optBool=true};
-    document.getElementById('alertsEnabled').checked=optBool;
+    getElement('alertsEnabled').checked=optBool;
 
     // Units
     const inputUnits = localStorage.getItem('inputUnits') || CONFIG.units;
@@ -100,41 +117,41 @@ window.CONFIG = {
 
     // custom greeting
     const customGreeting = localStorage.getItem('customGreeting');
-    document.getElementById('customGreeting').value=customGreeting;
+    getElement('customGreeting').value=customGreeting;
 
     // musicEnabled 
     optYN = localStorage.getItem('musicEnabled');
     if(optYN === "n") {optBool=false} else {optBool=true};
-    document.getElementById('musicEnabled').checked=optBool;
+    getElement('musicEnabled').checked=optBool;
 
     // appleWorkaround
     optYN = localStorage.getItem('appleWorkaround');
     if(optYN === "y") {optBool=true} else {optBool=false};
-    document.getElementById('appleWorkaround').checked=optBool;
+    getElement('appleWorkaround').checked=optBool;
 
     // voiceEnabled 
     optYN = localStorage.getItem('voiceEnabled');
     if(optYN === "n") {optBool=false} else {optBool=true};
-    document.getElementById('voiceEnabled').checked=optBool;
+    getElement('voiceEnabled').checked=optBool;
     let voiceEnabled=optBool;
 
     // PiperTTS Selected Voice
     const voiceSelect = localStorage.getItem('voiceSelect');
-    selElement = document.getElementById('voiceSelect');
+    selElement = getElement('voiceSelect');
     if(voiceEnabled) {
       selElement.disabled = !voiceEnabled;
       voiceEnabled= await fn_voiceURLCheck(voiceSelect); // Load the dropdown with available voices from the server.
       console.log("in Load, after voiceURLCheck. Selected voice=",selElement.value);
       // If there was an issue reaching the configured PiperTTS server, disable voice narrations.
       if(!voiceEnabled) {
-         document.getElementById('voiceEnabled').checked=voiceEnabled;
+         getElement('voiceEnabled').checked=voiceEnabled;
       }
     }
 
     // narrateAlerts
     optYN = localStorage.getItem('alertsNarration');
     if(optYN === "n") {optBool=false} else {optBool=true};
-    selElement = document.getElementById('alertsNarration')
+    selElement = getElement('alertsNarration')
     selElement.disabled = !voiceEnabled;
     selElement.checked=optBool;
 
@@ -143,11 +160,11 @@ window.CONFIG = {
     let optYN,optBool;
 
     // zip or airport code.
-    const usertext = document.getElementById('usertext').value;
+    const usertext = getElement('usertext').value;
     localStorage.setItem('usertext',usertext);
 
     // alertsEnabled 
-    optBool=document.getElementById('alertsEnabled').checked;
+    optBool=getElement('alertsEnabled').checked;
     if(optBool) {optYN="y"} else {optYN="n"};
     localStorage.setItem('alertsEnabled',optYN);
 
@@ -156,30 +173,30 @@ window.CONFIG = {
     localStorage.setItem('inputUnits',inputUnits);
 
     // custom greeting
-    const customGreeting = document.getElementById('customGreeting').value;
+    const customGreeting = getElement('customGreeting').value;
     localStorage.setItem('customGreeting',customGreeting);
 
     // musicEnabled 
-    optBool=document.getElementById('musicEnabled').checked;
+    optBool=getElement('musicEnabled').checked;
     if(optBool) {optYN="y"} else {optYN="n"};
     localStorage.setItem('musicEnabled',optYN);
 
     // appleWorkaround
-    optBool = document.getElementById('appleWorkaround').checked;
+    optBool = getElement('appleWorkaround').checked;
     if(optBool) {optYN="y"} else {optYN="n"};
     localStorage.setItem('appleWorkaround',optYN);
 
     // voiceEnabled 
-    optBool=document.getElementById('voiceEnabled').checked;
+    optBool=getElement('voiceEnabled').checked;
     if(optBool) {optYN="y"} else {optYN="n"};
     localStorage.setItem('voiceEnabled',optYN);
 
     // PiperTTS Selected Voice
-    const voiceSelect = document.getElementById('voiceSelect').value;
+    const voiceSelect = getElement('voiceSelect').value;
     localStorage.setItem('voiceSelect',voiceSelect);
 
     // narrateVoices
-    optBool=document.getElementById('alertsNarration').checked;
+    optBool=getElement('alertsNarration').checked;
     if(optBool) {optYN="y"} else {optYN="n"};
     localStorage.setItem('alertsNarration',optYN);
 

@@ -1,9 +1,13 @@
+// import the global configuration
+import { globalConfig } from "../common_configuration.js";
+
 // Determine the correct PiperTTS voice client configuration and set the voiceURL
 // for the web client to use.
 window.GetVoiceURL = async function() {
   let endpoint;
   let voiceURL="";
   let voiceOrder=0;
+  let voicelist;
 
   // Look through all the valid endpoints looking for an enabled one that functions
   for (let pri = 1; pri <= globalConfig.PiperTTS.endpoints.length; pri++) {
