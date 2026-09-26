@@ -88,7 +88,7 @@ function fetchAlerts(){
 }
 
 function KVReplace(SString,KeyPairs) {
-// This function performs a bulk replacement on a string using a set of key value pairs and resturns the resulting string. 
+// This function performs a bulk replacement on a string using a set of key value pairs and returns the resulting string. 
 
   Object.entries(KeyPairs).forEach(([key, value]) => {
    SString = SString.replaceAll(key,value);
