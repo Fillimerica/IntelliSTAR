@@ -69,6 +69,15 @@ export async function fetchCurrentWeather(){
   // The API returns a JSON string.
   const locJSON = await response.json();
 
+  // See if the JSON object has a valid data payload
+  if (!("results" in locJSON)) {
+    // Open-Meteo could not find the location that was entered. 
+    // Notify user on-screen and return.
+    const eText= getElement("weatherfetch-text").innerHTML + `<br\><br\> <span style="color: #991616;">ERROR! Location can not be found.<br\>Playback halted.</span>`;
+    getElement("weatherfetch-text").innerHTML = eText;
+    return false;
+  }
+
   // Store the returned values as per the open-meteo API
   longitude=locJSON.results[0].longitude;
   latitude=locJSON.results[0].latitude;
