@@ -6,6 +6,14 @@ Original fork from: [GitHub - qconrad/intellistar-emulator: A web application th
 
 #### Summary of Enhancements in this Fork:
 
++ Configurable weather forecast providers
+
+  - The Weather Corporation default interface has been entirely re-written, now uses the more modern v3 API and no longer fetches Alerts from the US National Weather Service. 
+
+  - Depreciated API key has been removed, replaced with a working key behind a proxy for demonstration purposes.
+
++ API Keys can be stored in a reverse proxy rather than in the source code.
+
 + Configurable radar providers
   
   - New leaflet-rainviewer based radar provider works much better on limited hardware such as streaming boxes.
@@ -32,6 +40,9 @@ Original fork from: [GitHub - qconrad/intellistar-emulator: A web application th
 This project was requested by my son Matthew, and is dedicated to him. May his love for all things weather and the Weather Channel never diminish.
 
 #### Release Summary
+
+Version 2.0.0 - New weather data model supports multiple providers. Depreciated API keys removed and replaced with an interface to a reverse proxy for secure access. Uses open-meteo for geocoding services, searches are no longer limited to just US zip codes and airport codes, locations can now be specified.
+In the TWC provider alerts now come directly from the v3 API and are no longer limited to only the USA.
 
 Version 1.5.x - Sunset of BasicTTS public Piper server. Switched to pythonanywhere based server. Fixed PiperTTS client code
 to handle generic Piper TTS server endpoints without explicit listing of URLs.
