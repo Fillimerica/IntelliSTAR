@@ -6,9 +6,10 @@ import {fetchCurrentWeather } from "./WeatherFetching.js";
 
 // Applicationwide Global Definitions.
 (function(win){
-  win.zipCode = "";
-  win.airportCode= "";
+  //win.zipCode = "";
+  //win.airportCode= "";
   win.cityName = "";
+  win.locForecast="";
 
   win.WEEKDAY = ["SUN",  "MON", "TUES", "WED", "THU", "FRI", "SAT"];
   win.isDay = true;
@@ -23,7 +24,6 @@ window.CONFIG = {
   units: 'e', // Supported in TWC API (e = English (imperial), m = Metric, h = Hybrid (UK)),
   unitField: 'imperial', // Supported in TWC API. This field will be filled in automatically. (imperial = e, metric = m, uk_hybrid = h)
   loop: false,
-  locationMode: "POSTAL",
   alertsEnabled: true,
   voiceEnabled: true,
   voiceURL: "",
@@ -33,95 +33,57 @@ window.CONFIG = {
   musicMute:false,
   radarSource: "",
   radarAPIKey: "",
+  forecastSource: "",
+  forecastAPIKey: "",
   audioVolume:"1", // Default to full/max volume. Config can override this.
-  
-  isLocationValid: () => {
-    // This is called from the UI dialog, where there is a combined zip/airport entrybox. 
-    // Need to determine if a zip code or airport code was entered and validate it. 
-    const usertext = getElement('usertext').value.trim();
-    let isValid = false;
-
-    // See if it is a zip code. (exactly 5 digits)
-    if(ValidZipFormat(usertext)) {
-      CONFIG.locationMode="POSTAL"
-      zipCode = usertext;
-      isValid=true;
-
-    } else if(ValidAirportFormat(usertext)) {
-      CONFIG.locationMode="AIRPORT"
-      airportCode = usertext;
-      isValid=true;
-
-    } else {
-      isValid=false;
-    }
-    return isValid;
-  },
+ 
+  // List of key words that alter the "currently in our area" narration.
+  conditionsKeywords: "rain|fog|drizzle|mist|showers|snow|thunder",  
+ 
   run: () => {
-    let wfText;
-    let result=false;
-    if(CONFIG.isLocationValid()) {
-      if(CONFIG.locationMode === "POSTAL") {
-        wfText = `Fetching current weather for zip-code: ${zipCode}`;
-        // Zip Codes are US Only, set US Radar Provider
-        CONFIG.radarSource = globalConfig.radar.ProviderUS;
-        CONFIG.radarAPIKey = globalConfig.radar.APIKeyUS;
-      } else if(CONFIG.locationMode === "AIRPORT") {
-        wfText = `Fetching current weather for airport: ${airportCode}`;
-        // Set the correct Radar Provider based on the 1st letter of the airport code.
-        if(airportCode[0]==="K") {
-          // ICAO code starts with K, set US Radar Provider
-          CONFIG.radarSource = globalConfig.radar.ProviderUS;
-          CONFIG.radarAPIKey = globalConfig.radar.APIKeyUS;
-        } else {
-          // ICAO code does not start with K, set WW Radar Provider
-          CONFIG.radarSource = globalConfig.radar.ProviderWW;
-          CONFIG.radarAPIKey = globalConfig.radar.APIKeyWW;
-        }
-      } else {
-        wfText = `Unknown Location Type. Forecast may not be valid.`;
-      }
+    // New unified variable for location (works for all types of entry)
+    locForecast = getElement('usertext').value.trim(); 
 
-      // Handle user specified custom greeting.
-      const cGreetMsg=getElement('customGreeting').value;
-      if (cGreetMsg.length>0) {
-        CONFIG.greeting=cGreetMsg;
-      }
-
-      // Handle the voice narration options.
-      CONFIG.voiceEnabled=getElement('voiceEnabled').checked;
-      CONFIG.voiceSelect=getElement('voiceSelect').value;
-      console.log("in run, Selected voice=",CONFIG.voiceSelect);
-      CONFIG.voiceAlertNarration=getElement('alertsNarration').checked;
-
-      // Handle Background Music.
-      CONFIG.musicEnabled = getElement('musicEnabled').checked;
-
-      // Handle Apple Mobile Device Workaround (mute instead of volume change for background music)
-      CONFIG.musicMute = getElement('appleWorkaround').checked;
-
-      // Handle Including Alerts (watches, warnings, advisories) in the sequence.
-      CONFIG.alertsEnabled = getElement('alertsEnabled').checked;
-
-      // Handle Audio Volume
-      CONFIG.audioVolume = getElement('volumeSlider').value
-
-      // Units Selection
-      CONFIG.units = document.querySelector('input[name="input-units"]:checked').value;
-
-      CONFIG.unitField = CONFIG.units === 'm' ? 'metric' : (CONFIG.units === 'h' ? 'uk_hybrid' : 'imperial')
-      getElement("weatherfetch-text").innerHTML = wfText;
-      getElement('weatherfetch-container').classList.add("shown");
-      getElement('weatherfetch-text').classList.add('extend');
-      fetchCurrentWeather();  // Get the weather data from online sources.
-      result=true;
+    // Handle user specified custom greeting.
+    const cGreetMsg=getElement('customGreeting').value;
+    if (cGreetMsg.length>0) {
+      CONFIG.greeting=cGreetMsg;
     }
-    return result;
+
+    // Handle the voice narration options.
+    CONFIG.voiceEnabled=getElement('voiceEnabled').checked;
+    CONFIG.voiceSelect=getElement('voiceSelect').value;
+    console.log("in run, Selected voice=",CONFIG.voiceSelect);
+    CONFIG.voiceAlertNarration=getElement('alertsNarration').checked;
+
+    // Handle Background Music.
+    CONFIG.musicEnabled = getElement('musicEnabled').checked;
+
+    // Handle Apple Mobile Device Workaround (mute instead of volume change for background music)
+    CONFIG.musicMute = getElement('appleWorkaround').checked;
+
+    // Handle Including Alerts (watches, warnings, advisories) in the sequence.
+    CONFIG.alertsEnabled = getElement('alertsEnabled').checked;
+
+    // Handle Audio Volume
+    CONFIG.audioVolume = getElement('volumeSlider').value
+
+    // Units Selection
+    CONFIG.units = document.querySelector('input[name="input-units"]:checked').value;
+
+    CONFIG.unitField = CONFIG.units === 'm' ? 'metric' : (CONFIG.units === 'h' ? 'uk_hybrid' : 'imperial')
+    const wfText=`Fetching current weather for location: ${locForecast}`
+    getElement("weatherfetch-text").innerHTML = wfText;
+    getElement('weatherfetch-container').classList.add("shown");
+    getElement('weatherfetch-text').classList.add('extend');
+    fetchCurrentWeather();  // Get the weather data from online sources.
+
   },
+
   load: async () => {
     let optYN,optBool,selElement;
 
-    // zip or airport code.
+    // zip or airport code or location.
     const usertext = localStorage.getItem('usertext');
     getElement('usertext').value=usertext;
 
@@ -185,7 +147,7 @@ window.CONFIG = {
   save: () => {
     let optYN,optBool;
 
-    // zip or airport code.
+    // zip or airport or location.
     const usertext = getElement('usertext').value;
     localStorage.setItem('usertext',usertext);
 
@@ -232,24 +194,6 @@ window.CONFIG = {
 
     MsgBox("Save Settings","Settings have been saved.");
   }
-}
-
-// Local validation functions.
-function ValidZipFormat(input) {
-    // ^: start of string
-    // \d{5}: exactly 5 digits (0-9)
-    // $: end of string
-    return /^\d{5}$/.test(input);
-}
-
-function ValidAirportFormat(input) {
-  // Regex:
-  // ^ - start of string
-  // [A-Z0-9] - alphanumeric characters
-  // {3,4} - 3 or 4 characters
-  // $ - end of string
-  const regex = /^[A-Z0-9]{3,4}$/;
-  return regex.test(input);
 }
 
 //CONFIG.unitField = CONFIG.units === 'm' ? 'metric' : (CONFIG.units === 'h' ? 'uk_hybrid' : 'imperial')

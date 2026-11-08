@@ -1,4 +1,4 @@
-// This is the common configuration file for the IntelliSTAR Local onm the 8's Emulator
+// This is the common configuration file for the IntelliSTAR Local on the 8's Emulator
 // Edit this file to set default configuration for operation.
 // See the comments for each section for details.
 export const globalConfig = {
@@ -15,9 +15,45 @@ general: {
     // the default text set here is displayed only if there are no active alerts (or if alerts are disabled in the UI)
     crawlText: "Hi Matthew! If there was a severe weather alert, it would be scrolling here... But right now there are no active alerts so dad can say hi.",
 
-    // twcAPIKey is the API key used to access the weather data.
-    // this key may need to be updated on occasion if it becomes invalid.
-    twcAPIKey: 'e1f10a1e78da46f5b10a1e78da96f525',
+},
+
+forecast: {
+    // Weather current and forecast conditions provider.
+
+    // The current conditions, daily condition narrations and 7-day outlook are derived
+    // from data sourced from public API providers. Historically, API keys were leaked
+    // and then copied into the source code. This implementation changes that.
+
+    // Wherever possible data is sourced from providers such as the National Weather Service in the US
+    // that don't require keys at all.
+    // In situations where that is not possible, a placeholder is provided for API keys.
+    // In order to support the static deployment on github.io, a serverless proxy is used which 
+    // avoids exposing any API keys.
+
+    // ProviderUS & ProviderWW are the names of the weather data providers for the corresponding area.
+    // ProviderUS is used for all zip codes, and for all airports that start with the letter K.
+    // ProviderWW is used for all airports that do not start with the letter K.
+    //
+    // For each variable, one of the following provider IDs must be specified. (The same ID can be used for both.)
+    //
+    // "twc" (needs API key, works well internationally, currently the DEFAULT)
+    // is the original provider for worldwide forecasts. A private key is required for access.
+    // (Note: Even though forecast data came from api.weather.com, which is The Weather Corporation/IBM,
+    // the alerts were always sourced from api.weather.gov, which is the National Weather Service in the United States.
+    // As a consequence, alerts never worked outside the US. As of November 2026 this remains the case.) 
+    //
+    // "nws" (no API key, US ONLY, non-DEFAULT for now)
+    // is the National Weather Service in the US and provides free weather data for the US only.
+    //
+    // "xweather" (needs API key, limited "free" requests per month, still under development)
+    // is a private commercial provider that offers narrative forecasts as well as current conditions and alerts.
+    // works worldwide but there is a limit of about 200 requests per month which makes it unsuitable for general
+    // public access. However, users who host their own site may elect to use this option, especially if 
+    // the twc/IBM option becomes unavailable.
+    ProviderWW: "twc",
+    APIKeyWW: "", // only if needed by the selected provider. See instructions.
+    ProviderUS: "twc",
+    APIKeyUS: "", // only if needed by the selected provider. See instructions.
 
 },
 
@@ -95,7 +131,7 @@ PiperTTS: {
     //      narration voices should be returned if the PiperTTS server is reachable.
     endpoints: [
         {order:1, type: "Server", url:"http://localhost:5000"},
-        {order:0, type: "Server", url:"https://someuser.pythonanywhere.com"},
+        {order:3, type: "Server", url:"https://fillimerica.pythonanywhere.com"},
         {order:2, type: "Client", url:"https://fillimerica.pythonanywhere.com"},
     ]
 },

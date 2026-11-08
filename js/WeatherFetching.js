@@ -1,15 +1,22 @@
+// This is the WeatherFetching module that uses a combination of free weather API
+// providers to retrieve the forecast and alerts.
+// Retrieval of Latitude & Longitude is provided by open-meteo.com. (No key)
+// Retrieval of current and forecast conditions is provided by configured providers.
+
+
 // import the global configuration
 import {globalConfig} from '../common_configuration.js';
 
+// Forecast Providers
+import { getWeatherTWC } from "./WeatherFetching_TWC.js";
+
+// Radar Providers
 // Custom Radar Handler RainView.
 import { getRadarLeafletRainViewer } from "./RadarLeafletRV.js";
-
 // Custom Radar Handler Iowa State Mesonet.
 import { getRadarLeafletIEM } from "./RadarLeafletIEM.js";
-
 // Custom Radar Handler Aeris/XWeather.
 import { getRadarLeafletXW } from "./RadarLeafletXW.js";
-
 // Custom Radar Handler Rainbow.AI.
 import { getRadarLeafletRBAI } from "./RadarLeafletRBAI.js";
 
@@ -27,238 +34,90 @@ import { scheduleTimeline } from "./MainScript.js";
 var longitude;
 var latitude;
 
-function fetchAlerts(){
-  var alertCrawl = "";
-  var alertCSec = "";
-  var alertText = "";
-  var alertCount = 0;
-  var alertDup = false;
+const locationProvider="https://geocoding-api.open-meteo.com/v1/search?count=1&name="
 
-  // Only fetch alerts if the global setting allows, 
-  // otherwise just fetch the forecast.
+export async function fetchCurrentWeather(){
 
-  if(CONFIG.alertsEnabled) {
-    fetch(`https://api.weather.gov/alerts/active?point=${latitude},${longitude}`)
-      .then(function(response) {
-          if (response.status !== 200) {
-              console.warn("Alerts Error, no alerts will be shown");
-          }
-        response.json().then(function(data) {
-          if (data.features !== undefined) {
-            for(var i = 0; i < data.features.length; i++) {
-              alertText=AlertFormat("<b>"+data.features[i].properties.event + "</b><br>" + data.features[i].properties.description).replace(/\n/g," ");
-              // If alerts already exist, need to compare the dispText values to avoid duplicates.
-              alertDup=false;
-              if (alertCount>0){
-                for(var i2 = 0; i2 < alertCount; i2++) {
-                  if (alertText==Weather.alerts[i2].dispText) {
-                    alertDup=true;
-                    break;
-                  }
-                }
-              }
-              if (!alertDup) {
-                // Initialize a new AlertObj object.
-                Weather.alerts[alertCount] = new Weather.AlertObj;
-                // Compute a non-narration alert display time, based roughly on the length of the alert.
-                Weather.alerts[alertCount].duration = 5000+(40*alertText.length); // default minimum display duration (used if not narrating)
-                Weather.alerts[alertCount].dispText = alertText;
-                // Set the crawl to be a constant string with all the newlines removed.
-                alertCSec = AlertFormat(data.features[i].properties.event + ". " + data.features[i].properties.description).replace(/\n/g," ");
-                // define the spoken alert text with expanded terms so the pronunciation is correct.
-                Weather.alerts[alertCount].speechText=VFormat(alertCSec);
-                alertCrawl = alertCrawl + " " + alertCSec;
-                alertCount++; // After the new object has been created, update the total alert counter.
-              }
-            }
-            if(alertCrawl != ""){
-              CONFIG.crawl = alertCrawl;
-            }
-            Weather.alertsActive = alertCount;
-          } else {
-            Weather.alertsActive = 0 ; // No active alerts returned.
-          }
-          fetchForecast(); // continue getting weather data only after response is received and processed.
-        });
-      })
-  } else {
-    Weather.alertsActive = 0; // no alerts since alerts are disabled.
-    fetchForecast();
-  }
-}
+  // Main function for obtaining the weather data.
+  // This function converts the zip or airport code or location into latitude & longitude using 
+  // the free API at open-meteo.com.
+  // Then the appropriate forecast data provider module is called to retrieve the current
+  // and forecast conditions.
+  // Then the appropriate radar provider is called to retrieve the radar loop for the area.
+  // Finally scheduleTimeline in Mainscript is called to start playback.
 
-function KVReplace(SString,KeyPairs) {
-// This function performs a bulk replacement on a string using a set of key value pairs and returns the resulting string. 
+  // Define a function level variable to determine if all data was retrieved from the
+  // configured service providers.
+  var allDataReceived=true;
 
-  Object.entries(KeyPairs).forEach(([key, value]) => {
-   SString = SString.replaceAll(key,value);
+  // Obtain the latitude & longitude of the location provided.
+  const url = locationProvider + locForecast;
+
+  // Call the open-meteo geocoding Server
+  const response = await fetch(url, {
+    method: 'GET'
   });
 
-return SString;
-}
-
-function AlertFormat(RawNarrative) {
-// This function removes some of the key terms from the narrative to display a more natural readability.
-  var KeyTerms = {"* WHAT...":" ","* WHERE...":"Location ","* WHEN...":"Lasting ","* IMPACTS...":" ","* ADDITIONAL DETAILS...":" "};
-
-return KVReplace(RawNarrative,KeyTerms);
-}
-
-function VFormat(RawNarrative) {
-// This function replaces weather abbreviations in the narrative with the full words to allow spoken voice.
-//Wind
-  const WindDir = {" N ":" north "," NNE ":" north north east "," NE ":" north east "," NNW ":" north north west "," NW ":" north west ",
-                 " E ":" east "," ENE ":" east north east "," ESE ":" east south east ",
-                 " S ":" south "," SSE ":" south south east "," SE ":" south east "," SSW ":" south south west "," SW ":" south west ",
-                 " W ":" west "," WNW ":" west north west "," WSW ":" west south west "};
-//Time Zones
-  const TimeZone = {" EST ":" eastern standard time "," EDT ":" eastern daylight time ",
-    " CST ":" central standard time "," CDT ":" central daylight time ",
-    " MST ":" mountain standard time "," MDT ":" mountain daylight time ",
-    " PST ":" pacific standard time "," PDT ":" pacific daylight time ",
-    " HST ":" Hawaii standard time "};
-//Fractional Distances
-  const FracDist = {" 1/4 ":" a quarter "," 1/2 ":" a half "," 3/4 ":" three quarters of a "};
-
-  RawNarrative = KVReplace(RawNarrative,WindDir);
-  RawNarrative = KVReplace(RawNarrative,TimeZone);
-  RawNarrative = KVReplace(RawNarrative,FracDist);
-
-  RawNarrative = RawNarrative.replace(/(\d+)F/gi," $1 degrees.");
-  RawNarrative = RawNarrative.replace(/mph/gi,"miles per hour");
-
-  RawNarrative = RawNarrative.replace(/(\d+)C/gi," $1 celsius.");
-  RawNarrative = RawNarrative.replace(/km\/h/gi,"kilometers per hour");
-return RawNarrative;
-}
-
-function fetchForecast(){
-  fetch(`https://api.weather.com/v1/geocode/${latitude}/${longitude}/forecast/daily/10day.json?language=${CONFIG.language}&units=${CONFIG.units}&apiKey=${globalConfig.general.twcAPIKey}`)
-    .then(function(response) {
-      if (response.status !== 200) {
-        console.log('forecast request error');
-        return;
-      }
-      response.json().then(function(data) {
-        let forecasts = data.forecasts
-        // narratives
-        isDay = forecasts[0].day; // If the API spits out a day forecast, use the day timings
-        let ns = []
-        ns.push(forecasts[0].day || forecasts[0].night); // there must be a day forecast so if the API doesn't provide one, just make it the night one. It won't show anyway.
-        ns.push(forecasts[0].night);
-        ns.push(forecasts[1].day);
-        ns.push(forecasts[1].night);
-        for (let i = 0; i <= 3; i++) {
-          let n = ns[i]
-          Weather.forecastTemp[i] = n.temp
-          Weather.forecastIcon[i] = n.icon_code
-          Weather.forecastNarrative[i] = VFormat(n.narrative)
-          Weather.forecastPrecip[i] = `${n.pop}% Chance<br/> of ${n.precip_type.charAt(0).toUpperCase() + n.precip_type.substr(1).toLowerCase()}`
-        }
-        // 7 day outlook
-        // TF Adjust 7-day start whether using the day or night forecast start. isDay controls.
-        var outlookStart;
-        if(isDay) {outlookStart = 0} else {outlookStart = 1};
-        for (var i = 0; i < 7; i++) {
-          let fc = forecasts[i+outlookStart];
-          Weather.outlookHigh[i] = fc.max_temp
-          Weather.outlookLow[i] = fc.min_temp
-          Weather.outlookCondition[i] = (fc.day ? fc.day : fc.night).phrase_32char.split(' ').join('<br/>')
-          // thunderstorm doesn't fit in the 7 day outlook boxes
-          // so I multilined it similar to that of the original
-          Weather.outlookCondition[i] = Weather.outlookCondition[i].replace("Thunderstorm", "Thunder</br>storm");
-          Weather.outlookIcon[i] = (fc.day ? fc.day : fc.night).icon_code
-        }
-        fetchRadarImages();
-      })
-    })
-}
-
-export function fetchCurrentWeather(){
-
-  //Let's check what we're dealing with
-  let location = "";
-  console.log(CONFIG.locationMode)
-  if(CONFIG.locationMode=="POSTAL") {location=`postalKey=${zipCode}:${CONFIG.countryCode}`}
-  else if (CONFIG.locationMode=="AIRPORT") {
-    //Determine whether this is an IATA or ICAO code
-    let airportCodeLength=airportCode.length;
-    if(airportCodeLength==3){location=`iataCode=${airportCode}`}
-    else if (airportCodeLength==4){location=`icaoCode=${airportCode}`}
-    else {
-      alert("Please enter a valid ICAO or IATA Code")
-      console.error(`Expected Airport Code Lenght to be 3 or 4 but was ${airportCodeLength}`)
-      return;
-    }
+  if (!response.ok) {
+    console.log("Open-Meteo geocoding response not ok. status=",response.status);
+    allDataReceived=false;
   }
-  else {
-    alert("Please select a location type");
-    console.error("Unknown what to use for location")
-    return;
-  }
-  
 
-  fetch(`https://api.weather.com/v3/location/point?${location}&language=${CONFIG.language}&format=json&apiKey=${globalConfig.general.twcAPIKey}`)
-      .then(function (response) {
-          if (response.status == 404) {
-              alert("Location not found!")
-              console.log('conditions request error');
-              return;
-          }
-          if (response.status !== 200) {
-              alert("Something went wrong (check the console)")
-              console.log('conditions request error');
-              return;
-          }
-      response.json().then(function(data) {
-        try {
-          // which LOCALE?!
-          //Not sure about the acuracy of this. Remove this if necessary
-          if(CONFIG.locationMode=="AIRPORT"){
-            cityName = data.location.airportName
-            .toUpperCase() //Airport names are long
-            .replace("INTERNATIONAL","") //If a city name is too long, info bar breaks
-            //.replace("AIRPORT","") //This is an attempt to fix it
-            .trim();
-            console.log(cityName);
-          } else {
-            //Shouldn't City Name be the field City Name, not Display Name?
-            cityName = data.location.city.toUpperCase();
-          }
-          latitude = data.location.latitude;
-          longitude = data.location.longitude;
-        } catch (err) {
-          alert('Enter valid ZIP code');
-          console.error(err)
-          getZipCodeFromUser();
-          return;
-        }
-        fetch(`https://api.weather.com/v1/geocode/${latitude}/${longitude}/observations/current.json?language=${CONFIG.language}&units=${CONFIG.units}&apiKey=${globalConfig.general.twcAPIKey}`)
-          .then(function(response) {
-            if (response.status !== 200) {
-              console.log("conditions request error");
-              return;
-            }
-            response.json().then(function(data) {
-              // cityName is set in the above fetch call and not this one
-              let unit = data.observation[CONFIG.unitField];
-              Weather.currentTemperature = Math.round(unit.temp);
-              Weather.currentCondition = data.observation.phrase_32char;
-              Weather.windSpeed = `${data.observation.wdir_cardinal} ${unit.wspd} ${CONFIG.units === 'm' ? 'km/h' : 'mph'}`;
-              Weather.gusts = unit.gust || 'NONE';
-              Weather.feelsLike = unit.feels_like
-              Weather.visibility = Math.round(unit.vis)
-              Weather.humidity = unit.rh
-              Weather.dewPoint = unit.dewpt
-              Weather.pressure = unit.altimeter.toPrecision(4);
-              let ptendCode = data.observation.ptend_code
-              Weather.pressureTrend = (ptendCode == 1 || ptendCode == 3) ? '▲' : ptendCode == 0 ? '' : '▼'; // if ptendCode == 1 or 3 (rising/rising rapidly) up arrow else its steady then nothing else (falling (rapidly)) down arrow
-              Weather.currentIcon = data.observation.icon_code
-              fetchAlerts();
-            });
-          });
-      })
-    });
+  // Only proceed if requests completed successfully.
+  if (!allDataReceived) { return false }
+
+  // The API returns a JSON string.
+  const locJSON = await response.json();
+
+  // Store the returned values as per the open-meteo API
+  longitude=locJSON.results[0].longitude;
+  latitude=locJSON.results[0].latitude;
+  cityName=locJSON.results[0].name;
+
+  const countryCode=locJSON.results[0].country_code;
+
+  // If the result is valid set the weather and radar data providers.
+  if(countryCode==="US") {
+    // ICAO code starts with K, set US Radar Provider
+    CONFIG.radarSource = globalConfig.radar.ProviderUS;
+    CONFIG.radarAPIKey = globalConfig.radar.APIKeyUS;
+    CONFIG.forecastSource = globalConfig.forecast.ProviderUS;
+    CONFIG.forecastAPIKey = globalConfig.forecast.APIKeyUS;
+  } else {
+    // ICAO code does not start with K, set WW Radar Provider
+    CONFIG.radarSource = globalConfig.radar.ProviderWW;
+    CONFIG.radarAPIKey = globalConfig.radar.APIKeyWW;
+    CONFIG.forecastSource = globalConfig.forecast.ProviderWW;
+    CONFIG.forecastAPIKey = globalConfig.forecast.APIKeyWW;
+  }
+
+  // Call the specific forecast provider.
+  switch (CONFIG.forecastSource) {
+    case "twc":
+      allDataReceived=await getWeatherTWC(latitude,longitude);
+      break;
+    case "nws":
+      allDataReceived=getWeather(latitude,longitude);
+      break;
+    case "xweather":
+      allDataReceived=getWeather(latitude,longitude);
+      break;
+    default:
+      console.log("Unknown forecast provider. No forecast data retrieved. forecastSource=",CONFIG.forecastSource);
+      allDataReceived=false;
+      break;
+  }
+  console.log("After getWeatherTWC function call");
+
+  // Only proceed if requests completed successfully.
+  if (!allDataReceived) { return false }
+
+  // Call the configured radar provider.
+  fetchRadarImages();
+
+  // Radar is the last in a string of weather elements to obtain.
+  // After all the weather data is obtained, start the visual playback sequence.
+  scheduleTimeline(); // Start the Local on the 8's main sequencer.
 
 }
 
@@ -285,9 +144,6 @@ function fetchRadarImages(){
       break;
   }
 
-  // Radar is the last in a string of weather elements to obtain.
-  // After all the weather data is obtained, start the visual playback sequence.
-  scheduleTimeline(); // Start the Local on the 8's main sequencer.
 }
 
 function getRadarDirectNWS(){  

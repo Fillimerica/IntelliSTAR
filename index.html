@@ -558,12 +558,8 @@
 
     function closeSettingsDialog() {
       console.log("Closing dialog");
-      if(CONFIG.isLocationValid()) {
-        document.getElementById("myDialog").close();
-        CONFIG.run();
-      } else {
-        MsgBox("Location Error","The location entered is neither a valid 5-digit zip code nor a valid airport code. <br> Canceling Weather Run");
-      }
+      document.getElementById("myDialog").close();
+      CONFIG.run();
     }
     // This code controls the disabled/enabled status of the children of the 
     // enable voice narration checkbox.

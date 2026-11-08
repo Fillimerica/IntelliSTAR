@@ -3,7 +3,7 @@
 // for my son Matthew, who loves the weather on the 8's.
 
 // Handle application versioning.
-const webAppVersion = "1.5.0";
+const webAppVersion = "2.0.0";
 
 // import the InformationSetting functions.
 import {
@@ -109,13 +109,19 @@ window.onload = async function () {
     document.querySelector('input[name="input-units"][value="' + inputUnits + '"]').checked = true;
   }
 //TF Implement feeding zip code on URL as ?zip=nnnnn or ?airport=aaaa and auto-starting.
+//TF 11/2026 New implementation now supports ?location=xxxx for all types of locations
+// and the old separations all feed the unified configuration parameter now.
   if (urlParams.has('zip')) {
     zipCode=urlParams.get('zip');
     getElement('usertext').value=zipCode;
     CONFIG.run();
   } else if (urlParams.has('airport')) {
-    airportCode=urlParams.get('airport').toUpperCase();
+    airportCode=urlParams.get('airport')
     getElement('usertext').value=airportCode;
+    CONFIG.run();
+  } else if (urlParams.has('location')) {
+    locationStr=urlParams.get('location')
+    getElement('usertext').value=locationStr;
     CONFIG.run();
   } else {
     openSettingsDialog();
@@ -145,7 +151,7 @@ export function scheduleTimeline(){
       pageDuration = ALERTS_NIGHT_DURATION;
     }
   }else {
-    // No active weather alerts, decide wich non-alert sequence based on forecast availability.
+    // No active weather alerts, decide witch non-alert sequence based on forecast availability.
     if(isDay){
       pageOrder = MORNING;
       pageDuration = MORNING_DURATION;
@@ -550,8 +556,7 @@ function executePage(pageIndex, subPageIndex){
 function cCondText() {
   let rString="";
   // inspect Weather.currentCondition for key words that define the narrative.
-  // Rain
-  if (Weather.currentCondition.search(/rain|showers|snow|thunder|patches of fog/i)!=-1) {
+  if (RegExp(CONFIG.conditionsKeywords,"i").test(Weather.currentCondition)){
     rString="Currently in our area. "+Weather.currentTemperature+" degrees, with "+Weather.currentCondition+".";
   } else {
     rString="Currently in our area. "+Weather.currentTemperature+" degrees, under "+Weather.currentCondition+" skies.";
