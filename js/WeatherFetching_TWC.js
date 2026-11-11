@@ -121,79 +121,6 @@ function VFormat(RawNarrative) {
 return RawNarrative;
 }
 
-async function fetchForecast(){
-  const response = await fetch(`${urlBase}/v1/geocode/${latitude}/${longitude}/forecast/daily/10day.json?language=${CONFIG.language}&units=${CONFIG.units}${urlSuffix}`,
-    { method: 'GET', headers: urlHeader }
-  );
-
-  if (response.status !== 200) {
-    console.log(`HTTP error! Status: ${response.status}`);
-    throw new Error(`HTTP error! Status: ${response.status}`);
-  }
-
-  const data = await response.json();
-
-  let forecasts = data.forecasts
-  // narratives
-  isDay = forecasts[0].day; // If the API spits out a day forecast, use the day timings
-  let ns = []
-  ns.push(forecasts[0].day || forecasts[0].night); // there must be a day forecast so if the API doesn't provide one, just make it the night one. It won't show anyway.
-  ns.push(forecasts[0].night);
-  ns.push(forecasts[1].day);
-  ns.push(forecasts[1].night);
-  for (let i = 0; i <= 3; i++) {
-    let n = ns[i]
-    Weather.forecastTemp[i] = n.temp
-    Weather.forecastIcon[i] = n.icon_code
-    Weather.forecastNarrative[i] = VFormat(n.narrative)
-    Weather.forecastPrecip[i] = `${n.pop}% Chance<br/> of ${n.precip_type.charAt(0).toUpperCase() + n.precip_type.substr(1).toLowerCase()}`
-  }
-  // 7 day outlook
-  // TF Adjust 7-day start whether using the day or night forecast start. isDay controls.
-  var outlookStart;
-  if(isDay) {outlookStart = 0} else {outlookStart = 1};
-  for (var i = 0; i < 7; i++) {
-    let fc = forecasts[i+outlookStart];
-    Weather.outlookHigh[i] = fc.max_temp
-    Weather.outlookLow[i] = fc.min_temp
-    Weather.outlookCondition[i] = (fc.day ? fc.day : fc.night).phrase_32char.split(' ').join('<br/>')
-    // thunderstorm doesn't fit in the 7 day outlook boxes
-    // so I multilined it similar to that of the original
-    Weather.outlookCondition[i] = Weather.outlookCondition[i].replace("Thunderstorm", "Thunder</br>storm");
-    Weather.outlookIcon[i] = (fc.day ? fc.day : fc.night).icon_code
-  }
-
-}
-
-async function fetchCurrentConditions(){
-
-//  const response = await fetch(`https://api.weather.com/v1/geocode/${latitude}/${longitude}/observations/current.json?language=${CONFIG.language}&units=${CONFIG.units}&apiKey=${CONFIG.forecastAPIKey}`);
-  const response = await fetch(`${urlBase}/v1/geocode/${latitude}/${longitude}/observations/current.json?language=${CONFIG.language}&units=${CONFIG.units}${urlSuffix}`,
-    { method: 'GET', headers: urlHeader }
-  );
-
-  if (response.status !== 200) {
-    console.log(`HTTP error! Status: ${response.status}`);
-    throw new Error(`HTTP error! Status: ${response.status}`);
-  }
-  const data = await response.json();
-
-  let unit = data.observation[CONFIG.unitField];
-  Weather.currentTemperature = Math.round(unit.temp);
-  Weather.currentCondition = data.observation.phrase_32char;
-  Weather.windSpeed = `${data.observation.wdir_cardinal} ${unit.wspd} ${CONFIG.units === 'm' ? 'km/h' : 'mph'}`;
-  Weather.gusts = unit.gust || 'NONE';
-  Weather.feelsLike = unit.feels_like
-  Weather.visibility = Math.round(unit.vis)
-  Weather.humidity = unit.rh
-  Weather.dewPoint = unit.dewpt
-  Weather.pressure = unit.altimeter.toPrecision(4);
-  let ptendCode = data.observation.ptend_code
-  Weather.pressureTrend = (ptendCode == 1 || ptendCode == 3) ? '▲' : ptendCode == 0 ? '' : '▼'; // if ptendCode == 1 or 3 (rising/rising rapidly) up arrow else its steady then nothing else (falling (rapidly)) down arrow
-  Weather.currentIcon = data.observation.icon_code
-
-}
-
 async function fetchWeatherData() {
   // Append v3-alerts-headlines using a semicolon separator
   const endPoints = 'v3-wx-observations-current;v3-wx-forecast-daily-10day;v3alertsHeadlines';
@@ -306,12 +233,6 @@ export async function getWeatherTWC(p_lat,p_long){
   setTWCUrl();
 
   await fetchWeatherData();
-
-//  await Promise.all([
-//    fetchCurrentConditions(),
-//    fetchAlerts(),
-//    fetchForecast()
-//  ]);
 
   return true;
 }
