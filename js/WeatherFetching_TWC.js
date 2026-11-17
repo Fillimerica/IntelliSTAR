@@ -204,23 +204,22 @@ async function fetchWeatherData() {
   }
 
   // 7-day outlook logic.
-  // Need the daytime wxPhraseLong and iconcode starting with tomorrow which is
-  // daypart index = 2
+  // Need the daytime wxPhraseLong and icon code.
+  // Starting with today if isDay=True, or tomorrow if isDay=False (follows WC logic)
 
-  for (let i = 1; i < 8; i++) {
-    Weather.outlookHigh[i-1] = forecastData.calendarDayTemperatureMax[i];
-    Weather.outlookLow[i-1] = forecastData.calendarDayTemperatureMin[i];
+  for (let i = 0; i < 7; i++) {
+    Weather.outlookHigh[i] = forecastData.calendarDayTemperatureMax[i+indexOffset];
+    Weather.outlookLow[i] = forecastData.calendarDayTemperatureMin[i+indexOffset];
 
-    let activePhrase = daypart.wxPhraseLong[(i*2)];
-    let activeIcon = daypart.iconCode[(i*2)];
+    let activePhrase = daypart.wxPhraseLong[(i*2+indexOffset)];
 
     // Split phrases on 2 lines to fit inside the boxes.
     let formattedCondition = activePhrase.split(' ').join('<br/>');
     if (formattedCondition.toLowerCase()==="thunderstorm") {
       formattedCondition="Thunder<br/>storm";
     }
-    Weather.outlookCondition[i-1] = formattedCondition;
-    Weather.outlookIcon[i-1] =  daypart.iconCode[(i*2)];
+    Weather.outlookCondition[i] = formattedCondition;
+    Weather.outlookIcon[i] =  daypart.iconCode[(i*2+indexOffset)];
   }
 }
 
