@@ -1,6 +1,6 @@
 #greeting-text-container{
   position: absolute;
-  top: 245px;
+  top: 275px;
   left: 420px;
   width: 700px;
   height: auto;
@@ -44,10 +44,10 @@
 
 #hello-location-container{
   position: absolute;
-  top: 63px;
+  top: 61px;
   left: 592px;
   width: auto;
-  height: 120px;
+  height: 200px;
   overflow: hidden;
   transition: top 0.3s, left 0.3s;
 }
