@@ -65,6 +65,7 @@
 .narrative-text{
   margin: 20px 40px 0px 40px;
   font-size: 52px;
+  white-space: pre-line;
 }
 
 .tomorrow-night-text{
