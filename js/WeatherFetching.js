@@ -9,6 +9,7 @@ import {globalConfig} from '../common_configuration.js';
 
 // Forecast Providers
 import { getWeatherTWC } from "./WeatherFetching_TWC.js";
+import { getWeatherOpenMeteo } from "./WeatherFetching_OpenMeteo.js";
 
 // Radar Providers
 // Custom Radar Handler RainView.
@@ -82,6 +83,7 @@ export async function fetchCurrentWeather(){
   longitude=locJSON.results[0].longitude;
   latitude=locJSON.results[0].latitude;
   cityName=locJSON.results[0].name;
+  Weather.timeZone=locJSON.results[0].timezone;
 
   const countryCode=locJSON.results[0].country_code;
 
@@ -105,11 +107,14 @@ export async function fetchCurrentWeather(){
     case "twc":
       allDataReceived=await getWeatherTWC(latitude,longitude);
       break;
+    case "openmeteo":
+      allDataReceived=await getWeatherOpenMeteo(latitude,longitude);
+      break;
     case "nws":
-      allDataReceived=getWeather(latitude,longitude);
+      allDataReceived=await getWeather(latitude,longitude);
       break;
     case "xweather":
-      allDataReceived=getWeather(latitude,longitude);
+      allDataReceived=await getWeather(latitude,longitude);
       break;
     default:
       console.log("Unknown forecast provider. No forecast data retrieved. forecastSource=",CONFIG.forecastSource);

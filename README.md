@@ -8,6 +8,8 @@ Original fork from: [GitHub - qconrad/intellistar-emulator: A web application th
 
 + Configurable weather forecast providers
 
+  - Open-Meteo free worldwide no key required interface is complete and is the default. Alerts are provided for US locations only.
+
   - The Weather Corporation default interface has been entirely re-written, now uses the more modern v3 API and no longer fetches Alerts from the US National Weather Service. 
 
   - Depreciated API key has been removed, replaced with a working key behind a proxy for demonstration purposes.
@@ -41,8 +43,13 @@ This project was requested by my son Matthew, and is dedicated to him. May his l
 
 #### Release Summary
 
+Version 2.1.0 - Formal release of the open-meteo interface. Also includes numerous cosmetic and animation fixes discovered during interface construction. 
+Changed narrative text to be more concise and is separate from the longer spoken narration text. A new narration engine has been created that takes raw
+weather data and constructs the forecast summary from those elements which replicates what is available from the TWC provider. This engine can be used for
+other interfaces as well.
+
 Version 2.0.0 - New weather data model supports multiple providers. Depreciated API keys removed and replaced with an interface to a reverse proxy for secure access. Uses open-meteo for geocoding services, searches are no longer limited to just US zip codes and airport codes, locations can now be specified.
-In the TWC provider alerts now come directly from the v3 API and are no longer limited to only the USA.
+In the TWC provider, alerts now come directly from the v3 API and are no longer limited to only the USA.
 
 Version 1.5.x - Sunset of BasicTTS public Piper server. Switched to pythonanywhere based server. Fixed PiperTTS client code
 to handle generic Piper TTS server endpoints without explicit listing of URLs.

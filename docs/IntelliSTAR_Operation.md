@@ -17,8 +17,8 @@ Most modern browsers on most modern systems can operate the IntelliSTAR emulator
 
     #### Information on each item in the dialog:
 
-    + **"Enter Zip or Airport ICAO Code"**\
-    Enter any valid 5 digit US zip code or any valid 4 character Airport ICAO code worldwide. The Emulator will retrieve the current and forecasted weather from the area around the entered location.
+    + **"Enter Zip,Airport Code,City"**\
+    Enter any place name (i.e. Rome) with an qualifier if needed (i.e. Rome, NY) for most locations worldwide. Alternatively a 4 character airport ICAO code can also be entered. For US locations only, a 5 digit US zip code can also be specified. The Emulator will retrieve the current and forecasted weather from the area around the entered location.
 
         > _Do not press the ENTER key after making the entry initially. Instead use the mouse or the TAB key on the keyboard for navigation. Pressing ENTER after making an entry in this box is a shortcut to run the emulator with the location entered_
       
@@ -35,7 +35,8 @@ Most modern browsers on most modern systems can operate the IntelliSTAR emulator
     If this option is checked, the background music will be silenced completely when the voice narration is being spoken. This is necessary for Apple devices because they do not support the emulator adjusting the volume levels during playback.\
     If this option is unchecked, the default, background music will duck (become quieter) while voice narration is taking place and then resume normal volume after the narration has finished.
         >_If this option is left unchecked on an Apple mobile device and narration and backgroud music are both enabled, the music and narration will both be played at full volume making the narration difficult to hear._
-    
+    + **"Master Volume"**\
+    This option can be used to decrease the sound volume for the music and narration. The browser default volume is 1.0.
         #### Voice Options
 
     + **"Enable voice narrations"**\
@@ -65,6 +66,11 @@ Most modern browsers on most modern systems can operate the IntelliSTAR emulator
 
 + **Direct Operation Mode**\
     Appending:
+    ```
+    ?location=any location
+    (substitute the desired location for "any location")
+    ```
+    OR
     ```
     ?zip=nnnnn
     (where nnnnn is a valid 5-digit US zip code)

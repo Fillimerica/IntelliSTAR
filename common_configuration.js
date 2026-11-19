@@ -36,23 +36,37 @@ forecast: {
     //
     // For each variable, one of the following provider IDs must be specified. (The same ID can be used for both.)
     //
-    // "twc" (needs API key, works well internationally, currently the DEFAULT)
+    // "openmeteo" (no API key, works well internationally, currently the DEFAULT)
+    // is a private commercial provider that has a generous policy of providing access to basic forecast data
+    // for most of the western world with no API key required. The principal downside is that the data
+    // is fully automated and is not augmented with live sensor readings nor manual adjustment by a meteorologist
+    // like some of the other commercial services provide. Therefore the current conditions are based on a forecast
+    // model rather than an actual observation. Forecasts align better with other providers.
+    // Chosen as the default because it works worldwide, although the nws interface may become the default for the US
+    // once it is released. 
+    // Alerts are provided for the US only and come from the NWS rather than open-meteo.
+    //
+    // "twc" (needs API key, works well internationally)
     // is the original provider for worldwide forecasts. A private key is required for access.
     // (Note: Even though forecast data came from api.weather.com, which is The Weather Corporation/IBM,
     // the alerts were always sourced from api.weather.gov, which is the National Weather Service in the United States.
-    // As a consequence, alerts never worked outside the US. As of November 2026 this remains the case.) 
+    // As a consequence, alerts never worked outside the US. However in November 2026 the interface was completely
+    // re-written to use the v3 API and the weather data request (including alerts) was consolidated.
+    // Therefore alerts are now provided worldwide from this provider. 
+    // Note: The embedded API key no longer works and has been removed. 
     //
-    // "nws" (no API key, US ONLY, non-DEFAULT for now)
-    // is the National Weather Service in the US and provides free weather data for the US only.
+    // "nws" (no API key, US ONLY, non-DEFAULT for now, still under development)
+    // is the National Weather Service in the US and provides free weather data for the US only. This interface is
+    // currently under construction.
     //
     // "xweather" (needs API key, limited "free" requests per month, still under development)
     // is a private commercial provider that offers narrative forecasts as well as current conditions and alerts.
     // works worldwide but there is a limit of about 200 requests per month which makes it unsuitable for general
     // public access. However, users who host their own site may elect to use this option, especially if 
     // the twc/IBM option becomes unavailable.
-    ProviderWW: "twc",
+    ProviderWW: "openmeteo",
     APIKeyWW: "", // only if needed by the selected provider. See instructions.
-    ProviderUS: "twc",
+    ProviderUS: "openmeteo",
     APIKeyUS: "", // only if needed by the selected provider. See instructions.
 
 },

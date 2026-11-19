@@ -2,6 +2,8 @@
 // The Weather Corporation / IBM
 // API Key Required
 
+// Imports
+import { AlertFormat, VFormat } from './WeatherData_Common.js';
 
 // Module level variables.
 var longitude;
@@ -70,55 +72,6 @@ async function fetchAlerts(alertData){
     CONFIG.crawl = alertCrawl;
   }
   Weather.alertsActive = alertCount;
-}
-
-function KVReplace(SString,KeyPairs) {
-// This function performs a bulk replacement on a string using a set of key value pairs and returns the resulting string. 
-
-  Object.entries(KeyPairs).forEach(([key, value]) => {
-   SString = SString.replaceAll(key,value);
-  });
-
-return SString;
-}
-
-function AlertFormat(RawNarrative) {
-// This function removes some of the key terms from the narrative to display a more natural readability.
-  var KeyTerms = {"* WHAT...":" ","* WHERE...":"Location ","* WHEN...":"Lasting ","* IMPACTS...":" ","* ADDITIONAL DETAILS...":" "};
-
-return KVReplace(RawNarrative,KeyTerms);
-}
-
-function VFormat(RawNarrative) {
-// This function replaces weather abbreviations in the narrative with the full words to allow spoken voice.
-//Wind
-  const WindDir = {" N ":" north "," NNE ":" north north east "," NE ":" north east "," NNW ":" north north west "," NW ":" north west ",
-                 " E ":" east "," ENE ":" east north east "," ESE ":" east south east ",
-                 " S ":" south "," SSE ":" south south east "," SE ":" south east "," SSW ":" south south west "," SW ":" south west ",
-                 " W ":" west "," WNW ":" west north west "," WSW ":" west south west "};
-//Time Zones
-  const TimeZone = {" EST ":" eastern standard time "," EDT ":" eastern daylight time ",
-    " CST ":" central standard time "," CDT ":" central daylight time ",
-    " MST ":" mountain standard time "," MDT ":" mountain daylight time ",
-    " PST ":" pacific standard time "," PDT ":" pacific daylight time ",
-    " HST ":" Hawaii standard time "};
-//Fractional Distances
-  const FracDist = {" 1/4 ":" a quarter "," 1/2 ":" a half "," 3/4 ":" three quarters of a "};
-
-  RawNarrative = KVReplace(RawNarrative,WindDir);
-  RawNarrative = KVReplace(RawNarrative,TimeZone);
-  RawNarrative = KVReplace(RawNarrative,FracDist);
-
-  // Special to replace an altitude nnnnft prior to looking at temperature.
-  RawNarrative = RawNarrative.replace(/(\d+)FT/gi," $1 feet.");
-
-  // Temperature and velocity abbreviations.
-  RawNarrative = RawNarrative.replace(/(\d+)F/gi," $1 degrees.");
-  RawNarrative = RawNarrative.replace(/mph/gi,"miles per hour");
-
-  RawNarrative = RawNarrative.replace(/(\d+)C/gi," $1 celsius.");
-  RawNarrative = RawNarrative.replace(/km\/h/gi,"kilometers per hour");
-return RawNarrative;
 }
 
 async function fetchWeatherData() {
@@ -199,7 +152,8 @@ async function fetchWeatherData() {
   for (let i = indexOffset; i <= 3; i++) {
     Weather.forecastTemp[i] = daypart.temperature[i];
     Weather.forecastIcon[i] = daypart.iconCode[i];
-    Weather.forecastNarrative[i] = VFormat(daypart.narrative[i]);
+    Weather.forecastNarrative[i] = daypart.narrative[i];
+    Weather.forecastSpeech[i] = VFormat(Weather.forecastNarrative[i]);
     Weather.forecastPrecip[i] = `${daypart.precipChance[i]}% Chance<br/> of ${daypart.precipType[i]}`;
   }
 
