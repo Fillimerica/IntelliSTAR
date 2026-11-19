@@ -97,7 +97,8 @@ window.onload = async function () {
   // Determine the day name for tomorrow, in case it is needed in the narration.
   const tomorrowDate = new Date();
   tomorrowDate.setDate(tomorrowDate.getDate() + 1); // add +1 to today's date for tomorrow's date.
-  tomorrowName = tomorrowDate.toLocaleDateString(CONFIG.language, { weekday: 'long'});
+  // TF 11/2026 Fix bug where timeZone was not taken into account. (Issue when fetching weather in other time zones)
+  tomorrowName = tomorrowDate.toLocaleDateString(CONFIG.language, { timeZone: Weather.timeZone, weekday: 'long'});
 
   setMainBackground();
   resizeWindow();
@@ -856,8 +857,10 @@ function setClockTime(){
   setTimeout(setClockTime, 5000);
 }
 
-/* Used to linearly animate a numeric value. In contex, the temperature and
+/* Used to linearly animate a numeric value. In context, the temperature and
    other current conditions at beginning are animated this way */
+// TF 11/2026 Changed function to stop incrementing when current value equals
+// OR exceeds end. Original function would race if the numeric was not an integer.
 function animateValue(id, start, end, duration, pad) {
   var obj = getElement(id);
   if(start == end){
@@ -871,7 +874,7 @@ function animateValue(id, start, end, duration, pad) {
   var timer = setInterval(function() {
       current += increment;
       obj.innerHTML = current.pad(pad);
-      if (current == end) {
+      if (current >= end) {
           clearInterval(timer);
       }
   }, stepTime);
