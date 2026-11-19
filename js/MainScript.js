@@ -533,17 +533,17 @@ function executePage(pageIndex, subPageIndex){
     // not spoken in live broadcast speechStart("and here is the Local Radar.");    
   }
   else if(currentSubPageName == "today-page"){
-    speechStart("today. "+Weather.forecastNarrative[0]);    
+    speechStart("today. "+Weather.forecastSpeech[0]);    
   }
   else if(currentSubPageName == "tonight-page"){
-    speechStart("tonight. "+Weather.forecastNarrative[1]);    
+    speechStart("tonight. "+Weather.forecastSpeech[1]);    
   }
   else if(currentSubPageName == "tomorrow-page"){
     // The Local on the 8's use the actual name of the day of the week here.
-    speechStart(tomorrowName+". "+Weather.forecastNarrative[2]);    
+    speechStart(tomorrowName+". "+Weather.forecastSpeech[2]);    
   }
   else if(currentSubPageName == "tomorrow-night-page"){
-    speechStart(tomorrowName+" Night. "+Weather.forecastNarrative[3]);    
+    speechStart(tomorrowName+" Night. "+Weather.forecastSpeech[3]);    
   }
   else if(currentSubPageName == "7day-page"){
     speechStart("Here is our seven day outlook.");    
