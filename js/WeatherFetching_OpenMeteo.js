@@ -195,54 +195,42 @@ async function fetchNWSAlerts(){
   var alertCount = 0;
   var alertDup = false;
 
+  Weather.alertsActive = 0 ;
   // Only fetch alerts if the global setting allows, 
-  // otherwise just fetch the forecast.
-
   if(CONFIG.alertsEnabled) {
-    fetch(`https://api.weather.gov/alerts/active?point=${latitude},${longitude}`)
-      .then(function(response) {
-          if (response.status !== 200) {
-              console.warn("Alerts Error, no alerts will be shown");
-          }
-        response.json().then(function(data) {
-          if (data.features !== undefined) {
-            for(var i = 0; i < data.features.length; i++) {
-              alertText=AlertFormat("<b>"+data.features[i].properties.event + "</b><br>" + data.features[i].properties.description).replace(/\n/g," ");
-              // If alerts already exist, need to compare the dispText values to avoid duplicates.
-              alertDup=false;
-              if (alertCount>0){
-                for(var i2 = 0; i2 < alertCount; i2++) {
-                  if (alertText==Weather.alerts[i2].dispText) {
-                    alertDup=true;
-                    break;
-                  }
-                }
-              }
-              if (!alertDup) {
-                // Initialize a new AlertObj object.
-                Weather.alerts[alertCount] = new Weather.AlertObj;
-                // Compute a non-narration alert display time, based roughly on the length of the alert.
-                Weather.alerts[alertCount].duration = 5000+(40*alertText.length); // default minimum display duration (used if not narrating)
-                Weather.alerts[alertCount].dispText = alertText;
-                // Set the crawl to be a constant string with all the newlines removed.
-                alertCSec = AlertFormat(data.features[i].properties.event + ". " + data.features[i].properties.description).replace(/\n/g," ");
-                // define the spoken alert text with expanded terms so the pronunciation is correct.
-                Weather.alerts[alertCount].speechText=VFormat(alertCSec);
-                alertCrawl = alertCrawl + " " + alertCSec;
-                alertCount++; // After the new object has been created, update the total alert counter.
-              }
+    const data=await fetchAPIData(`${urlBase}/alerts/active?point=${latitude},${longitude}`);
+    if (data.features !== undefined) {
+      for(var i = 0; i < data.features.length; i++) {
+        alertText=AlertFormat("<b>"+data.features[i].properties.event + "</b><br>" + data.features[i].properties.description).replace(/\n/g," ");
+        // If alerts already exist, need to compare the dispText values to avoid duplicates.
+        alertDup=false;
+        if (alertCount>0){
+          for(var i2 = 0; i2 < alertCount; i2++) {
+            if (alertText==Weather.alerts[i2].dispText) {
+              alertDup=true;
+              break;
             }
-            if(alertCrawl != ""){
-              CONFIG.crawl = alertCrawl;
-            }
-            Weather.alertsActive = alertCount;
-          } else {
-            Weather.alertsActive = 0 ; // No active alerts returned.
           }
-        });
-      })
-  } else {
-    Weather.alertsActive = 0; // no alerts since alerts are disabled.
+        }
+        if (!alertDup) {
+          // Initialize a new AlertObj object.
+          Weather.alerts[alertCount] = new Weather.AlertObj;
+          // Compute a non-narration alert display time, based roughly on the length of the alert.
+          Weather.alerts[alertCount].duration = 5000+(40*alertText.length); // default minimum display duration (used if not narrating)
+          Weather.alerts[alertCount].dispText = alertText;
+          // Set the crawl to be a constant string with all the newlines removed.
+          alertCSec = AlertFormat(data.features[i].properties.event + ". " + data.features[i].properties.description).replace(/\n/g," ");
+          // define the spoken alert text with expanded terms so the pronunciation is correct.
+          Weather.alerts[alertCount].speechText=VFormat(alertCSec);
+          alertCrawl = alertCrawl + " " + alertCSec;
+          alertCount++; // After the new object has been created, update the total alert counter.
+        }
+      }
+      if(alertCrawl != ""){
+        CONFIG.crawl = alertCrawl;
+      }
+      Weather.alertsActive = alertCount;
+    }
   }
 }
 
