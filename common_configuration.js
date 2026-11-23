@@ -66,7 +66,7 @@ forecast: {
     // the twc/IBM option becomes unavailable.
     ProviderWW: "openmeteo",
     APIKeyWW: "", // only if needed by the selected provider. See instructions.
-    ProviderUS: "openmeteo",
+    ProviderUS: "nws",
     APIKeyUS: "", // only if needed by the selected provider. See instructions.
 
 },

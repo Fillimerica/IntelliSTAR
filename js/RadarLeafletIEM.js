@@ -20,22 +20,6 @@ const RADAR_ATTRIB = "Iowa Environmental Mesonet"
 const FRAME_COUNT = 10;
 const FRAME_INTERVAL = (10 * 60 * 1000); // time between radar frames in milliseconds (10 minutes)
 
-
-// === STATE ===
-// Regional radar image
-Weather.radarImage = {};
-Weather.radarImage.map = {};
-Weather.radarImage.layerCache = {};
-Weather.radarImage.animationTimer = false;
-Weather.radarImage.animationPosition = 0;
-
-// Local radar image
-Weather.zoomedRadarImage = {};
-Weather.zoomedRadarImage.map = {};
-Weather.zoomedRadarImage.layerCache = {};
-Weather.zoomedRadarImage.animationTimer = false;
-Weather.zoomedRadarImage.animationPosition = 0;
-
 // === UTILITIES ===
 function wrapPosition(radarObj,position) {
     // index is 0 based so upper bounds is the length
@@ -73,7 +57,7 @@ function clearLayerCache(radarObj) {
 
 // === DISPLAY ===
 function showFrame(radarObj,position) {
-    console.log("In Showframe Pos=",position);
+    //console.log("In Showframe Pos=",position);
     position = wrapPosition(radarObj,position);
 
     // Set the opacity of the selected frame to > 0, then set the 
@@ -125,29 +109,41 @@ export function setRadarAnimation(radarObj,AnimationEnabled) {
 }
 
 export function getRadarLeafletIEM(latitude,longitude) {
-    // === MAP SETUP Regional ===
-    Weather.radarImage.map = L.map('radar-container', { maxZoom: 20 }).setView([latitude, longitude], globalConfig.radar.zoomLevelRegional);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
-        tileSize: TILE_SIZE,
-        zoomOffset: ZOOM_OFFSET
-    }).addTo(Weather.radarImage.map);
-
-    initialize(Weather.radarImage);
-
-    // If there are active alerts, configure the local radar as well.
-
-    if(Weather.alertsActive> 0) {
-
-        // === MAP SETUP Local ===
-        Weather.zoomedRadarImage.map = L.map('zoomed-radar-container', { maxZoom: 20 }).setView([latitude, longitude], globalConfig.radar.zoomLevelLocal);
+    // Moved radar object initialization out of module global for isolation
+    // and to properly handle looping of the Local 8's.
+    if (Weather.radarImage==undefined) {
+        // === MAP SETUP Regional ===
+        Weather.radarImage = {};
+        Weather.radarImage.layerCache = {};
+        Weather.radarImage.map = L.map('radar-container', { maxZoom: 20 }).setView([latitude, longitude], globalConfig.radar.zoomLevelRegional);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
             tileSize: TILE_SIZE,
             zoomOffset: ZOOM_OFFSET
-        }).addTo(Weather.zoomedRadarImage.map);
+        }).addTo(Weather.radarImage.map);
+    }
+
+    initialize(Weather.radarImage);
+
+    // If there are active alerts, configure the local radar as well.
+
+    if (Weather.alertsActive> 0) {
+
+        // Moved radar object initialization out of module global for isolation
+        // and to properly handle looping of the Local 8's.
+        if (Weather.zoomedRadarImage==undefined) {
+            // === MAP SETUP Local ===
+            Weather.zoomedRadarImage = {};
+            Weather.zoomedRadarImage.layerCache = {};
+            Weather.zoomedRadarImage.map = L.map('zoomed-radar-container', { maxZoom: 20 }).setView([latitude, longitude], globalConfig.radar.zoomLevelLocal);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+                tileSize: TILE_SIZE,
+                zoomOffset: ZOOM_OFFSET
+            }).addTo(Weather.zoomedRadarImage.map);
+        }
 
         initialize(Weather.zoomedRadarImage);
     }

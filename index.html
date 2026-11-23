@@ -65,7 +65,7 @@
 
     <!-- Top Information Bar -->
     <div id="infobar-container">
-      <img id="infobar-twc-logo" src="assets/logos/twc.svg" onclick="twcLogoClick();" />
+      <img id="infobar-twc-logo" src="assets/logos/twc.svg" />
       <img id="infobar-local-logo" src="assets/logos/local.svg" />
       <div id="infobar-location-container" class="infobar-item-container">
         <div id="infobar-location-text" class="regular-text infobar-text"></div>
@@ -506,8 +506,21 @@
           <button style="margin: auto;" id="errorDialogButton">Ok</button>
   </dialog>
 
-  <!-- Inline Javascript Support Functions -->
+  <!-- Inline Javascript Support Functions  and auto-execute code-->
   <script>
+    // Section A: Executed automatically on page load.
+
+    // Define default enter key action on the dialog.
+    // Enter on the Location input field automatically starts the run..
+    document.getElementById('usertext').addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') {
+          event.preventDefault();
+          closeSettingsDialog(); // Validate input and start the run.
+      }
+    });
+
+    // Section B: Support Functions
+
     function openCustomModal(modal,okAction = () =>{}) {
         return new Promise((resolve) => {
             modal.showModal();
@@ -533,28 +546,11 @@
       return result;
     }
 
-    // Define default enter key action on the dialog.
-    // Enter on the Location input field automatically starts the run..
-    document.getElementById('usertext').addEventListener('keydown', function(event) {
-      if (event.key === 'Enter') {
-          event.preventDefault();
-          closeSettingsDialog(); // Validate input and start the run.
-      }
-    });
-
-
-    //const openButton = document.getElementById('dialog-open');
-    //openButton.addEventListener('click', () => {
-    //    openDialog();
-    //});
     function openSettingsDialog() {
       console.log("Opening dialog");
       document.getElementById("myDialog").show();
       document.getElementById("usertext").focus();
     }
-
-    //const closeButton = document.getElementById('dialog-close');
-    //closeButton.addEventListener('click', closeDialog);
 
     function closeSettingsDialog() {
       console.log("Closing dialog");

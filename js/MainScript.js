@@ -94,6 +94,12 @@ return cumlativeTime;
 window.onload = async function () {
   getElement('webappversion-text').innerHTML = 'Web Application Version: ' + webAppVersion ;
   await CONFIG.load();
+  await MainStart();
+}
+
+async function MainStart() {
+  // This function is called by the window onload and the looping function to start/restart
+  // the current run.
   // Determine the day name for tomorrow, in case it is needed in the narration.
   const tomorrowDate = new Date();
   tomorrowDate.setDate(tomorrowDate.getDate() + 1); // add +1 to today's date for tomorrow's date.
@@ -103,27 +109,39 @@ window.onload = async function () {
   setMainBackground();
   resizeWindow();
   setClockTime();
-// TF 03/2026 Implement additional url parameters for controlling options.
-  // Units 
-  if (urlParams.has('units')) {
-    const inputUnits=urlParams.get('units');
-    document.querySelector('input[name="input-units"][value="' + inputUnits + '"]').checked = true;
-  }
-//TF Implement feeding zip code on URL as ?zip=nnnnn or ?airport=aaaa and auto-starting.
-//TF 11/2026 New implementation now supports ?location=xxxx for all types of locations
-// and the old separations all feed the unified configuration parameter now.
-  if (urlParams.has('zip')) {
-    getElement('usertext').value=urlParams.get('zip');
-    CONFIG.run();
-  } else if (urlParams.has('airport')) {
-    getElement('usertext').value=urlParams.get('airport');
-    CONFIG.run();
-  } else if (urlParams.has('location')) {
-    getElement('usertext').value=urlParams.get('location');
-    CONFIG.run();
+
+  // TF 11/2026 Fixed loop selection by clicking on TWC logo.
+  getElement('infobar-twc-logo').addEventListener('click', () => {
+    twcLogoClick();
+  });
+
+  if (!CONFIG.loop) {
+    // Only parse and show the UI if not looping.
+    // TF 03/2026 Implement additional url parameters for controlling options.
+    // Units 
+    if (urlParams.has('units')) {
+      const inputUnits=urlParams.get('units');
+      document.querySelector('input[name="input-units"][value="' + inputUnits + '"]').checked = true;
+    }
+    //TF Implement feeding zip code on URL as ?zip=nnnnn or ?airport=aaaa and auto-starting.
+    //TF 11/2026 New implementation now supports ?location=xxxx for all types of locations
+    // and the old separations all feed the unified configuration parameter now.
+    if (urlParams.has('zip')) {
+      getElement('usertext').value=urlParams.get('zip');
+      CONFIG.run();
+    } else if (urlParams.has('airport')) {
+      getElement('usertext').value=urlParams.get('airport');
+      CONFIG.run();
+    } else if (urlParams.has('location')) {
+      getElement('usertext').value=urlParams.get('location');
+      CONFIG.run();
+    } else {
+      openSettingsDialog();
+    }
   } else {
-    openSettingsDialog();
+    CONFIG.run();
   }
+
 }
 
 function preLoadMusic(){
@@ -170,6 +188,19 @@ function revealTimeline(){
   for (var i = 0; i < timelineElements.length; i++) {
     timelineElements[i].style.top = '0px';
   }
+}
+
+function hideTimeline(){
+  // This function resets the TimeLine elements back to their starting states.
+  getElement('timeline-event-container').classList.remove('shown');
+  getElement('timeline-event-container').replaceChildren();
+  getElement('timeline-event-container').style.left=0;
+  currentLogoIndex=0;
+  getElement('logo-stack').classList.remove('shown');
+  getElement('logo-stack').style.left=0;
+  getElement('progress-stack').replaceChildren();
+  getElement('progressbar-container').classList.remove('shown');
+  resetProgressBar();
 }
 
 /* Now that all the fetched information is stored in memory, display them in
@@ -349,26 +380,24 @@ async function executeGreetingPage(){
     }
   }
 
-  getElement('background-image').classList.remove("below-screen");
+  getElement('background-image').classList.remove('below-screen');
   getElement('content-container').classList.add('shown');
   getElement('infobar-twc-logo').classList.add('shown');
   getElement('hello-text').classList.add('shown');
   getElement('hello-location-text').classList.add('shown');
   getElement('greeting-text').classList.add('shown');
-  getElement('local-logo-container').classList.add("shown");
+  getElement('local-logo-container').classList.add('shown');
   setTimeout(clearGreetingPage, (greetingScreenDelay + voiceGreetOverflow));
 }
 
 async function clearGreetingPage(){
-  // Remove transition delay from greeting
-  getElement('greeting-text').classList.remove('shown');
-  getElement('local-logo-container').classList.remove('shown');
 
   // Hide everything
-  getElement('greeting-text').classList.add('hidden');
-  getElement('hello-text-container').classList.add('hidden');
-  getElement("hello-location-container").classList.add("hidden");
-  getElement("local-logo-container").classList.add("hidden");
+  getElement('greeting-text').classList.remove('shown');
+  getElement('hello-text').classList.remove('shown');
+  getElement('hello-location-text').classList.remove('shown');
+
+  getElement('local-logo-container').classList.remove('shown');
 
   // If alerts are active, make sure the duration calculation has completed
   // prior to trying to schedule the page sequence.
@@ -576,15 +605,14 @@ function clearPage(pageIndex, subPageIndex){
     resetProgressBar();
   }
 
+  currentSubPageElement.style.transitionDelay = '0s';
+  currentSubPageElement.style.left = '-101%';
+
   if(isLastPage){
 //TF Allow crawl to last until all the pages and subpages are displayed.
     hideCrawl();
     stopRadar();
     endSequence();
-  }
-  else{
-    currentSubPageElement.style.transitionDelay = '0s';
-    currentSubPageElement.style.left = '-101%';
   }
 }
 
@@ -739,7 +767,6 @@ function setKbdShortcuts(mode) {
   } else {
     document.removeEventListener("keydown", KbdListener);
   }
-
 }
 
 function KbdListener(p_event) {
@@ -751,9 +778,9 @@ function KbdListener(p_event) {
 }
 
 function twcLogoClick() {
-  var alertMessageShown = getElement('alert-message').classList.contains('shown');
+  const alertMessageShown = getElement('alert-message').classList.contains('shown');
   if(alertMessageShown) return;
-  var loopStatus = localStorage.getItem('loop');
+  const loopStatus = localStorage.getItem('loop');
   if(loopStatus == "y"){
     localStorage.setItem('loop', 'n');
     CONFIG.loop = false;
@@ -766,60 +793,64 @@ function twcLogoClick() {
 }
 
 function clearInfoBar(){
-  getElement("infobar-twc-logo").classList.add("hidden");
-  getElement("infobar-local-logo").classList.add("hidden");
-  getElement("infobar-location-container").classList.add("hidden");
-  getElement("infobar-time-container").classList.add("hidden");
+  getElement("infobar-twc-logo").classList.remove('shown');
+  getElement("infobar-local-logo").classList.remove('shown');
+  getElement("infobar-location-container").classList.remove('shown');
+  getElement("infobar-time-container").classList.remove('shown');
   setTimeout(clearElements, 200);
 }
 
 // Animates everything out (not including main background)
 function clearElements(){
-  getElement("outlook-titlebar").classList.add('hidden');
-  getElement("forecast-left-container").classList.add('hidden');
-  getElement("forecast-right-container").classList.add('hidden');
+  getElement("outlook-titlebar").classList.remove('shown');
+  getElement("forecast-left-container").classList.remove('shown');
+  getElement("forecast-right-container").classList.remove('shown');
   getElement("content-container").classList.add("expand");
-  getElement("timeline-container").style.visibility = "hidden";
-  showEnding();
+  hideTimeline();
+  showEndingPhrase(true);
   setTimeout(clearEnd, endScreenDelay);
 }
 
-function showEnding(){
-  if(Weather.alerts.length > 0){
-    stayUpdated();
+function showEndingPhrase(isShow=true) {
+  // This function displays or hides one of 2 ending phrases based on 
+  // whether there are active alerts or not.
+  let selPhrase;
+  if (Weather.alerts.length > 0) { 
+    selPhrase='amazing';
+  } else {
+    selPhrase='updated';
   }
-  else{
-    itsAmazingOutThere();
+  if (isShow) {
+    getElement(`${selPhrase}-text`).classList.add('extend');
+    getElement(`${selPhrase}-logo`).classList.add('shown');
+  } else {
+    getElement(`${selPhrase}-text`).classList.remove('extend');
+    getElement(`${selPhrase}-logo`).classList.remove('shown');
   }
-}
-
-function itsAmazingOutThere(){
-  getElement('amazing-text').classList.add('extend');
-  getElement("amazing-logo").classList.add('shown');
-  //getElement("amazing-container").classList.add('hide');
-}
-
-function stayUpdated(){
-  getElement('updated-text').classList.add('extend');
-  getElement("updated-logo").classList.add('shown');
-  //getElement("updated-container").classList.add('hide');
 }
 
 // Final background animate out
 function clearEnd(){
-  getElement('background-image').classList.add("above-screen");
-  getElement('content-container').classList.add("above-screen");
-
-  // Reload the page after animation has completed
   // If looping is enabled, the sequence will start again
-  // Otherwise, the zip code prompt will show again
   if (CONFIG.loop) {  
+    showEndingPhrase(false);
+    //setTimeout(MainStart, 400)
     setTimeout(reloadPage, 400)
+  } else {
+    getElement('background-image').classList.add("above-screen");
+    getElement('content-container').classList.add("above-screen");
   }
 }
 
 function reloadPage(){
-  location.reload()
+  // This function handles some setup and resetting of the environment prior
+  // to re-starting the sequence with the previously saved values.
+
+  // To support looping, need to reset the position of the current-conditions page.
+  getElement("current-page").style.removeProperty('top');
+  // And need to remove some classes from content-container.
+  getElement('content-container').classList.remove("expand");
+  MainStart();
 }
 
 function loadInfoBar(){
@@ -1019,7 +1050,7 @@ function showCrawl(){
 }
 
 function hideCrawl(){
-  getElement('crawler-container').classList.add("hidden");
+  getElement('crawler-container').classList.remove('shown');
 }
 
 function startCrawl(){

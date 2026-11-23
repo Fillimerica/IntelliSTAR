@@ -16,23 +16,8 @@ const RADAR_OPACITY = 0.7; // How transparent the radar is over the map.
 const ANIMATION_DELAY_MS = 500;
 const API_URL = "https://api.rainviewer.com/public/weather-maps.json";
 const RADAR_ATTRIB = "RainViewer"
+
 // === STATE ===
-// Regional radar image
-Weather.radarImage = {};
-Weather.radarImage.map = {};
-Weather.radarImage.mapFrames = [];
-Weather.radarImage.layerCache = {};
-Weather.radarImage.animationTimer = false;
-Weather.radarImage.animationPosition = 0;
-
-// Local radar image
-Weather.zoomedRadarImage = {};
-Weather.zoomedRadarImage.map = {};
-Weather.zoomedRadarImage.mapFrames = [];
-Weather.zoomedRadarImage.layerCache = {};
-Weather.zoomedRadarImage.animationTimer = false;
-Weather.zoomedRadarImage.animationPosition = 0;
-
 var apiData = {};
 
 // === UTILITIES ===
@@ -131,14 +116,20 @@ export function setRadarAnimation(radarObj,AnimationEnabled) {
 }
 
 export function getRadarLeafletRainViewer(latitude,longitude) {
-    // === MAP SETUP Regional ===
-    Weather.radarImage.map = L.map('radar-container', { maxZoom: 12 }).setView([latitude, longitude], globalConfig.radar.zoomLevelRegional);
+    // Moved radar object initialization out of module global for isolation
+    // and to properly handle looping of the Local 8's.
+    if (Weather.radarImage==undefined) {
+        // === MAP SETUP Regional ===
+        Weather.radarImage = {};
+        Weather.radarImage.layerCache = {};
+        Weather.radarImage.map = L.map('radar-container', { maxZoom: 12 }).setView([latitude, longitude], globalConfig.radar.zoomLevelRegional);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
-        tileSize: TILE_SIZE,
-        zoomOffset: ZOOM_OFFSET
-    }).addTo(Weather.radarImage.map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+            tileSize: TILE_SIZE,
+            zoomOffset: ZOOM_OFFSET
+        }).addTo(Weather.radarImage.map);
+    }
 
     loadApiData(Weather.radarImage);
 
@@ -146,14 +137,20 @@ export function getRadarLeafletRainViewer(latitude,longitude) {
 
     if(Weather.alertsActive> 0) {
 
-        // === MAP SETUP Local ===
-        Weather.zoomedRadarImage.map = L.map('zoomed-radar-container', { maxZoom: 12 }).setView([latitude, longitude], globalConfig.radar.zoomLevelLocal);
+        // Moved radar object initialization out of module global for isolation
+        // and to properly handle looping of the Local 8's.
+        if (Weather.zoomedRadarImage==undefined) {
+            // === MAP SETUP Local ===
+            Weather.zoomedRadarImage = {};
+            Weather.zoomedRadarImage.layerCache = {};
+            Weather.zoomedRadarImage.map = L.map('zoomed-radar-container', { maxZoom: 12 }).setView([latitude, longitude], globalConfig.radar.zoomLevelLocal);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
-            tileSize: TILE_SIZE,
-            zoomOffset: ZOOM_OFFSET
-        }).addTo(Weather.zoomedRadarImage.map);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+                tileSize: TILE_SIZE,
+                zoomOffset: ZOOM_OFFSET
+            }).addTo(Weather.zoomedRadarImage.map);
+        }
 
         loadApiData(Weather.zoomedRadarImage);
     }

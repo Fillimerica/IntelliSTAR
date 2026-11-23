@@ -23,6 +23,7 @@ export function setGreetingPage(){
 export function setTimelineEvents(){
   var eventContainer = getElement('timeline-event-container');
   var progreessBarStack = getElement('progress-stack');
+
   for(var i = 0; i < pageOrder.length; i++){
     var eventElement = document.createElement("div");
     eventElement.innerHTML = pageOrder[i].name;
@@ -49,6 +50,8 @@ export function setCurrentConditions(){
 }
 
 export function createLogoElements(){
+  // Clear out the existing logo stack. Needed for looping.
+  getElement('logo-stack').replaceChildren();
   var alreadyAddedLogos = [];
   for(var p = 0; p < pageOrder.length; p++){
     for (var s = 0; s < pageOrder[p].subpages.length; s++) {

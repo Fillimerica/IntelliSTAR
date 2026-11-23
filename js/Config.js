@@ -83,6 +83,10 @@ window.CONFIG = {
   load: async () => {
     let optYN,optBool,selElement;
 
+    // Read persistent loop status
+    optYN = localStorage.getItem('loop');
+    if(optYN === "n") {CONFIG.loop=false} else {CONFIG.loop=true};
+
     // zip or airport code or location.
     const usertext = localStorage.getItem('usertext');
     getElement('usertext').value=usertext;
