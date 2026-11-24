@@ -10,6 +10,7 @@ import {globalConfig} from '../common_configuration.js';
 // Forecast Providers
 import { getWeatherTWC } from "./WeatherFetching_TWC.js";
 import { getWeatherOpenMeteo } from "./WeatherFetching_OpenMeteo.js";
+import { getWeatherNWS } from "./WeatherFetching_NWS.js";
 
 // Radar Providers
 // Custom Radar Handler RainView.
@@ -111,7 +112,7 @@ export async function fetchCurrentWeather(){
       allDataReceived=await getWeatherOpenMeteo(latitude,longitude);
       break;
     case "nws":
-      allDataReceived=await getWeather(latitude,longitude);
+      allDataReceived=await getWeatherNWS(latitude,longitude);
       break;
     case "xweather":
       allDataReceived=await getWeather(latitude,longitude);

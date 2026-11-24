@@ -3,7 +3,7 @@
 // for my son Matthew, who loves the weather on the 8's.
 
 // Handle application versioning.
-const webAppVersion = "2.1.0";
+const webAppVersion = "2.2.0";
 
 // import the InformationSetting functions.
 import {
@@ -743,30 +743,51 @@ function scrollCC(){
   for (var i = 0; i < ccElements.length; i++) {
     ccElements[i].style.top = '-80px';
   }
-  // Split decimal into 2 objects so that we can animate them individually.
-  var pressureArray = Weather.pressure.toString().split('.');
-  animateValue("cc-visibility", 0, Weather.visibility, 800, 1);
-  if(CONFIG.units != 'm') {
-      getElement("cc-visibility-unit-metric").style.fontSize = "0px";		//Doing the work twice, for good reason: if we simply hide it, the spacing left by the word still exists; if we simply set the size to zero, then it might still be visible at extreme zoom levels.
-      getElement("cc-visibility-unit-metric").style.visibility = "hidden";
+  if (Weather.visibility !='n/a') {
+    if(CONFIG.units != 'm') {
+        getElement("cc-visibility-unit").textContent = "mi.";
+    } else {
+        getElement("cc-visibility-unit").textContent = "km.";
+    }
+    animateValue("cc-visibility", 0, Weather.visibility, 800, 1);
   } else {
-      getElement("cc-visibility-unit-imperial").style.fontSize = "0px";
-      getElement("cc-visibility-unit-imperial").style.visibility = "hidden";
+    getElement("cc-visibility-unit").textContent='';
+    getElement("cc-visibility").textContent='n/a';
   }
-  animateValue("cc-humidity", 0, Weather.humidity, 1000, 1);
-  animateValue("cc-dewpoint", 0, Weather.dewPoint, 1200, 1);
-  if (CONFIG.units === 'e') {		//Imperial units.
-    animateValue("cc-pressure1", 0, pressureArray[0], 1400, 1);
-    animateValue("cc-pressure2", 0, pressureArray[1], 1400, 2);
-    getElement("cc-pressure-metric").style.fontSize = "0px";		//hide the "mbar" tag
-    getElement("cc-pressure-metric").style.visibility = "hidden";
-  } else {      //Metric units.
+  if (Weather.humidity !='n/a') {
+    getElement("cc-humidity-unit").textContent = "%";
+    animateValue("cc-humidity", 0, Weather.humidity, 1000, 1);
+  } else {
+    getElement("cc-humidity-unit").textContent='';
+    getElement("cc-humidity").textContent='n/a;'
+  }
+  if (Weather.dewPoint !='n/a') {
+    getElement("cc-dewpoint-unit").textContent = "°";
+    animateValue("cc-dewpoint", 0, Weather.dewPoint, 1200, 1);
+  } else {
+    getElement("cc-dewpoint-unit").textContent='';
+    getElement("cc-dewpoint").textContent='n/a;'
+  }
+
+  if (Weather.pressure !='n/a') {
+    // Split decimal into 2 objects so that we can animate them individually.
+    var pressureArray = Weather.pressure.toString().split('.');
+    if (CONFIG.units != 'm') {		//Imperial units.
+      getElement("cc-pressure-decimal").textContent=".";
+      getElement("cc-pressure-unit").textContent="inHg";
+      animateValue("cc-pressure1", 0, pressureArray[0], 1400, 1);
+      animateValue("cc-pressure2", 0, pressureArray[1], 1400, 2);
+    } else {      //Metric units.
+      getElement("cc-pressure-decimal").textContent="";
+      getElement("cc-pressure2").textContent="";
+      getElement("cc-pressure-unit").textContent="hPa";
       animateValue("cc-pressure1", 800, pressureArray[0], 1400, 3);
-      getElement("cc-pressure2").style.visibility = "hidden";		//Hide figures after the decimal, since we don't really use decimal points when using hectopascals in the context of meteorology
-      getElement("cc-pressure2").style.fontSize = "0px";
-      getElement("cc-pressure-decimal").style.visibility = "hidden";		//And same for the decimal, which would look silly without something after it.
-      getElement("cc-pressure-decimal").style.fontSize = "0px";
+    }
+  } else {
+    getElement("cc-dewpoint-unit").textContent='';
+    getElement("cc-dewpoint").textContent='n/a;'
   }
+
 }
 
 // Called at end of sequence. Animates everything out and shows ending text

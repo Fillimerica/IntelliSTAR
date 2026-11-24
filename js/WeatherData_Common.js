@@ -28,10 +28,22 @@ export function avgWindDir(deg1, deg2) {
   return ((toDeg(Math.atan2(x, y)) % 360) + 360) % 360;
 }
 
+// Temperature conversion
+export function tempCtoF(tempC) {
+  return (tempC * 1.8 + 32)
+}
+export function tempFtoC(tempF) {
+  return ((tempF - 32) * 0.55555)
+}
 
 // Barometric Pressure Conversions hPa to inHg
 export function baroPressureInHg(pressure_hPa) {
-  return pressure_hPa * 0.02953
+  return (pressure_hPa * 0.02953)
+}
+
+// Speed/distance  KM to Miles
+export function KMtoMiles(unitKM) {
+  return (unitKM * 0.621371)
 }
 
 // Visibility in feet to miles Conversion to 2 decimals
