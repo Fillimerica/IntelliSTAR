@@ -510,6 +510,23 @@ function execAlerts(alertIndex) {
   }
 }
 
+function resetAlerts() {
+  // This function resets the alerts so they can be re-displayed in the loop.
+  // If there are active alerts, then need to reset the dynamic-alerts-page.
+  if (Weather.alertsActive>0) {
+    // Reset any hidden alert pages
+    for (var i = 0; i < Weather.alertsActive; i++){
+      const alertID=`alert${i}`;
+      getElement(alertID).classList.remove('hidden');
+    }
+    getElement('dynamic-alerts-page').style.transition='none';
+    getElement('dynamic-alerts-page').style.removeProperty('top');
+    getElement('dynamic-alerts-page').style.left=0;
+    getElement('dynamic-alerts-page').offsetHeight;
+    getElement('dynamic-alerts-page').style.transition='';
+  }
+}
+
 function executePage(pageIndex, subPageIndex){
   var currentPage = pageOrder[pageIndex];
   var currentSubPageName = currentPage.subpages[subPageIndex].name;
@@ -674,25 +691,25 @@ function stopRadar(){
   switch(CONFIG.radarSource) {
     case "leaflet-iowastate":
       setIEMAnimation(Weather.radarImage,false);
-      if (Weather.zoomedRadarImage.animationTimer) {
+      if (Weather.zoomedRadarImage != undefined) {
         setIEMAnimation(Weather.zoomedRadarImage,false);
       }
       break;
     case "leaflet-rainviewer":
       setRVAnimation(Weather.radarImage,false);
-      if (Weather.zoomedRadarImage.animationTimer) {
+      if (Weather.zoomedRadarImage != undefined) {
         setRVAnimation(Weather.zoomedRadarImage,false);
       }
       break;
     case "leaflet-xweather":
       setXWAnimation(Weather.radarImage,false);
-      if (Weather.zoomedRadarImage.animationTimer) {
+      if (Weather.zoomedRadarImage != undefined) {
         setXWAnimation(Weather.zoomedRadarImage,false);
       }
       break;
     case "leaflet-rainbowai":
       setRBAIAnimation(Weather.radarImage,false);
-      if (Weather.zoomedRadarImage.animationTimer) {
+      if (Weather.zoomedRadarImage != undefined) {
         setRBAIAnimation(Weather.zoomedRadarImage,false);
       }
       break;
@@ -807,6 +824,7 @@ function clearElements(){
   getElement("forecast-right-container").classList.remove('shown');
   getElement("content-container").classList.add("expand");
   hideTimeline();
+  resetAlerts();
   showEndingPhrase(true);
   setTimeout(clearEnd, endScreenDelay);
 }
