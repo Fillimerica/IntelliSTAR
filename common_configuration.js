@@ -36,7 +36,7 @@ forecast: {
     //
     // For each variable, one of the following provider IDs must be specified. (The same ID can be used for both.)
     //
-    // "openmeteo" (no API key, works well internationally, currently the DEFAULT)
+    // "openmeteo" (no API key, works well internationally, currently the DEFAULT for non-US locations)
     // is a private commercial provider that has a generous policy of providing access to basic forecast data
     // for most of the western world with no API key required. The principal downside is that the data
     // is fully automated and is not augmented with live sensor readings nor manual adjustment by a meteorologist
@@ -55,7 +55,7 @@ forecast: {
     // Therefore alerts are now provided worldwide from this provider. 
     // Note: The embedded API key no longer works and has been removed. 
     //
-    // "nws" (no API key, US ONLY, non-DEFAULT for now, still under development)
+    // "nws" (no API key, US ONLY, DEFAULT for US locations only)
     // is the National Weather Service in the US and provides free weather data for the US only. This interface is
     // currently under construction.
     //

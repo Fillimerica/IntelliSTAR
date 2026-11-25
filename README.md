@@ -8,6 +8,8 @@ Original fork from: [GitHub - qconrad/intellistar-emulator: A web application th
 
 + Configurable weather forecast providers
 
+  - US NWS (free USA locations only) no key required interface is now complete and is the default for US locations. Open-Meteo remains the default for non-US locations.
+
   - Open-Meteo free worldwide no key required interface is complete and is the default. Alerts are provided for US locations only.
 
   - The Weather Corporation default interface has been entirely re-written, now uses the more modern v3 API and no longer fetches Alerts from the US National Weather Service. 
@@ -42,6 +44,9 @@ Original fork from: [GitHub - qconrad/intellistar-emulator: A web application th
 This project was requested by my son Matthew, and is dedicated to him. May his love for all things weather and the Weather Channel never diminish.
 
 #### Release Summary
+
+Version 2.2.0 - Formal release of the US NWS weather provider interface. The principal benefit of using the NWS interface over the Open-Meteo interface for US locations is that the NWS API uses real-time nearest station observation data for the current conditions. 
+- Also major revisions to the mainscript scheduler and the UI elements to FINALLY implement proper looping.
 
 Version 2.1.0 - Formal release of the open-meteo interface. Also includes numerous cosmetic and animation fixes discovered during interface construction. 
 Changed narrative text to be more concise and is separate from the longer spoken narration text. A new narration engine has been created that takes raw
