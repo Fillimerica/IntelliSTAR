@@ -359,10 +359,11 @@ async function fetchWeatherCurrent() {
     currentData=rootData.features[i].properties;
     if (currentData.seaLevelPressure.value != null) {
       curBaroPressure=currentData.seaLevelPressure.value/100;
+      break;
     } else if (currentData.barometricPressure.value != null) {
       curBaroPressure=currentData.barometricPressure.value/100;
+      break;
     }
-    break;
   }
   // If there is a valid current barometric pressure, try to find a corresponding value from an earlier period.
   if (curBaroPressure>0) {
@@ -371,10 +372,11 @@ async function fetchWeatherCurrent() {
       currentData=rootData.features[j-1].properties;
       if (currentData.seaLevelPressure.value != null) {
         histBaroPressure=currentData.seaLevelPressure.value/100;
+        break;
       } else if (currentData.barometricPressure.value != null) {
         histBaroPressure=currentData.barometricPressure.value/100;
+        break;
       }
-      break;
     }
   }
   if (curBaroPressure>0) {
