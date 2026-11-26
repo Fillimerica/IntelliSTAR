@@ -93,73 +93,76 @@ function mapNWSTextToNWSCode(shortForecast) {
   // This function attempts to interpret the nws short forecast string and 
   // returns the corresponding nwsCode to be used in the sky condition lookup.
 
-  if (typeof iconStr == "string") {
-    const text = (shortForecast || '').split(/\bthen\b/i).toLowerCase();
+  if (typeof shortForecast == "string") {
+    const text = (shortForecast || '').split(/\bthen\b/i);
  
     // Severe & Convective
-    if (/\b(tornado|funnel)\b/.test(text)) return 'tornado';
-    if (/\bhurricane\b/.test(text)) return 'hurricane';
-    if (/\btropical storm\b/.test(text)) return 'tropical_storm';
-    if (/\b(isolated|slight chance).*(thunderstorm|t-storm)\b/.test(text)) return 'tsra_hi';
-    if (/\b(scattered|chance).*(thunderstorm|t-storm)\b/.test(text)) return 'tsra_sct';
-    if (/\b(thunderstorm|t-storm|thunder)\b/.test(text)) return 'tsra';
+    if (/\b(tornado|funnel)\b/i.test(text)) return 'tornado';
+    if (/\bhurricane\b/i.test(text)) return 'hurricane';
+    if (/\btropical storm\b/i.test(text)) return 'tropical_storm';
+    if (/\b(isolated|slight chance).*(thunderstorm|t-storm)\b/i.test(text)) return 'tsra_hi';
+    if (/\b(scattered|chance).*(thunderstorm|t-storm)\b/i.test(text)) return 'tsra_sct';
+    if (/\b(thunderstorm|t-storm|thunder)\b/i.test(text)) return 'tsra';
 
     // Winter Precipitation
-    if (/\bblizzard\b/.test(text)) return 'blizzard';
-    if (/\bfreezing drizzle\b/.test(text)) return 'fzdriz';
-    if (/\bfreezing rain\b/.test(text)) return 'fzra';
-    if (/\brain and snow\b/.test(text)) return 'rain_snow';
-    if (/\brain and sleet\b/.test(text)) return 'rain_sleet';
-    if (/\bwintry mix\b/.test(text)) return 'snow_sleet';
-    if (/\b(sleet|ice pellets)\b/.test(text)) return 'sleet';
-    if (/\bflurries\b/.test(text)) return 'snow_flurries';
-    if (/\b(scattered|chance).*snow showers\b/.test(text)) return 'snow_shwrsct'
-    if (/\bsnow showers\b/.test(text)) return 'snow_shwr';
-    if (/\bheavy snow\b/.test(text)) return 'snow_heavy';
-    if (/\b(snow|blowing snow)\b/.test(text)) return 'snow';
+    if (/\bblizzard\b/i.test(text)) return 'blizzard';
+    if (/\bfreezing drizzle\b/i.test(text)) return 'fzdriz';
+    if (/\bfreezing rain\b/i.test(text)) return 'fzra';
+    if (/\brain and snow\b/i.test(text)) return 'rain_snow';
+    if (/\brain and sleet\b/i.test(text)) return 'rain_sleet';
+    if (/\bwintry mix\b/i.test(text)) return 'snow_sleet';
+    if (/\b(sleet|ice pellets)\b/i.test(text)) return 'sleet';
+    if (/\bflurries\b/i.test(text)) return 'snow_flurries';
+    if (/\b(scattered|chance).*snow showers\b/i.test(text)) return 'snow_shwrsct'
+    if (/\bsnow showers\b/i.test(text)) return 'snow_shwr';
+    if (/\bheavy snow\b/i.test(text)) return 'snow_heavy';
+    if (/\b(snow|blowing snow)\b/i.test(text)) return 'snow';
 
     // Liquid Precipitation
-    if (/\bdrizzle\b/.test(text)) return 'drizzle';
-    if (/\bheavy rain\b/.test(text)) return 'rain_showers_hi';
-    if (/\b(scattered|chance|isolated).*(showers|rain)\b/.test(text)) return 'rain_sct';
-    if (/\bshowers\b/.test(text)) return 'rain_showers';
-    if (/\brain\b/.test(text)) return 'rain';
+    if (/\bdrizzle\b/i.test(text)) return 'drizzle';
+    if (/\bheavy rain\b/i.test(text)) return 'rain_showers_hi';
+    if (/\b(scattered|chance|isolated).*(showers|rain)\b/i.test(text)) return 'rain_sct';
+    if (/\bshowers\b/i.test(text)) return 'rain_showers';
+    if (/\brain\b/i.test(text)) return 'rain';
 
     // Obstructions & Wind
-    if (/\b(fog|mist)\b/.test(text)) return 'fog';
-    if (/\bhaze\b/.test(text)) return 'haze';
-    if (/\bsmoke\b/.test(text)) return 'smoke';
-    if (/\bdust\b/.test(text)) return 'dust';
-    if (/\b(windy|blustery|gale)\b/.test(text)) return 'windy';
-    if (/\bbreezy\b/.test(text)) return 'breezy';
+    if (/\b(fog|mist)\b/i.test(text)) return 'fog';
+    if (/\bhaze\b/i.test(text)) return 'haze';
+    if (/\bsmoke\b/i.test(text)) return 'smoke';
+    if (/\bdust\b/i.test(text)) return 'dust';
+    if (/\b(windy|blustery|gale)\b/i.test(text)) return 'windy';
+    if (/\bbreezy\b/i.test(text)) return 'breezy';
 
     // Sky Cover
-    if (/\b(overcast|cloudy)\b/.test(text) && !/\b(partly|mostly)\b/.test(text)) return 'ovc';
-    if (/\bmostly cloudy\b/.test(text)) return 'bkn';
-    if (/\b(partly sunny|partly cloudy)\b/.test(text)) return 'sct';
-    if (/\b(a few clouds|mostly sunny|mostly clear|fair)\b/.test(text)) return 'few';
-    if (/\b(sunny|clear)\b/.test(text)) return 'skc';
+    if (/\b(overcast|cloudy)\b/i.test(text) && !/\b(partly|mostly)\b/i.test(text)) return 'ovc';
+    if (/\bmostly cloudy\b/i.test(text)) return 'bkn';
+    if (/\b(partly sunny|partly cloudy)\b/i.test(text)) return 'sct';
+    if (/\b(a few clouds|mostly sunny|mostly clear|fair)\b/i.test(text)) return 'few';
+    if (/\b(sunny|clear)\b/i.test(text)) return 'skc';
   }
   return 'xxx'; // TWC Not Available (N/A)
 }
 
-function getNWSCodeFromIcon(iconStr,shortFcst="") {
-  // This function extracts the nws sky condition code from the provided icon string 
-  // (between the trailing slash and the following question mark). If a code can't be found, then 
-  // the alternate sky condition string is interpreted instead.
+function getNWSCodeFromDesc(shortFcst) {
+  // This function extracts the nws sky condition code from the provided descriptive text.
   // Returns the corresponding nwsCode object from the nwsCode table above.
-  let nwsCode="";
+  const nwsCode=mapNWSTextToNWSCode(shortFcst);
+  
+  // Return the cross-referenced code object.
+  return getnwsCode(nwsCode);
+}
+
+function getNWSCodeFromIcon(iconStr) {
+  // This function extracts the nws sky condition code from the provided icon string 
+  // (between the trailing slash and the following question mark).
+  // Returns the corresponding nwsCode object from the nwsCode table above.
+  let nwsCode="xxx";
   if (typeof iconStr == "string") {
     const extractCode=iconStr.match("\/([^\/,?]+)[,?]")
     if (extractCode) {nwsCode=extractCode[1];}
   }
-  // If nwsCode is empty, fall-back to a lookup using shortFcst instead.
-  if (nwsCode=="") {
-    console.log(`GetNWSCodeFromIcon UNABLE TO GET CODE FROM ICON. Trying Short Description. icon=${iconStr} | description=${shortFcst}`);
-    nwsCode=mapNWSTextToNWSCode(shortFcst);
-  }
-  
-  // Finally return the cross-referenced code object.
+
+  // Return the cross-referenced code object.
   return getnwsCode(nwsCode);
 }
 
@@ -228,51 +231,71 @@ async function fetchNWSAlerts(){
 async function fetchWeatherCurrent() {
   // NWS Query for Current Conditions (and a slight look-back for pressure to calculate a simple trend).
   // for the current conditions, all numeric values are in metric (temp,dew point,pressure,wind, visibility)
+  const obsLimit=24;
 
-  const rootData = await fetchAPIData(`${nearestStationURL}/observations?limit=24`);
+  const rootData = await fetchAPIData(`${nearestStationURL}/observations?limit=${obsLimit}`);
 
   // CURRENT CONDITIONS 
   // Sometimes the reporting station doesn't report but the automated system logs an observation
   // nonetheless. If the temperature values are invalid, then try to obtain the last valid reporting period.
-  let currentData = rootData.features[0].properties;
-  if (currentData.temperature.value==null) {
-   for (let i=1; i<24; i++) {
-      currentData=rootData.features[i].properties;
-      if (currentData.temperature.value != null) {break;}
-    }
-  }
-  // Even with this observation validation, specific parameters might still be missing and need to be validated
-  // individually.
+  let currentData;
+  let i;
 
-  // Temperature, dew point, and humidity.
-  if (currentData.temperature.value != null) {
-    if (temperatureUnit=='fahrenheit') {
-      Weather.currentTemperature = Math.round(tempCtoF(currentData.temperature.value));
-      Weather.dewPoint = Math.round(tempCtoF(currentData.dewpoint.value));
-    } else {
-      Weather.currentTemperature = Math.round(currentData.temperature.value);
-      Weather.dewPoint = Math.round(currentData.dewpoint.value);
+  for (i=0; i<obsLimit; i++) {
+    currentData=rootData.features[i].properties;
+    // Temperature, dew point, and humidity.
+    if (currentData.temperature.value != null) {
+      if (temperatureUnit=='fahrenheit') {
+        Weather.currentTemperature = Math.round(tempCtoF(currentData.temperature.value));
+        if (currentData.dewpoint.value != null) {
+          Weather.dewPoint = Math.round(tempCtoF(currentData.dewpoint.value));
+        } else {
+          Weather.dewPoint='n/a';
+        }
+      } else {
+        Weather.currentTemperature = Math.round(currentData.temperature.value);
+        if (currentData.dewpoint.value != null) {
+          Weather.dewPoint = Math.round(tempCtoF(currentData.dewpoint.value));
+        } else {
+          Weather.dewPoint='n/a';
+        }
+      }
+      if (currentData.relativeHumidity.value != null) {
+        Weather.humidity = Math.round(currentData.relativeHumidity.value);
+      } else {
+        Weather.humidity='n/a';
+      }
+      // Feels like temperature if available.
+      if (currentData.windChill.value != null) {
+        if (temperatureUnit=='fahrenheit') {
+          Weather.feelsLike = Math.round(tempCtoF(currentData.windChill.value));
+        } else {
+          Weather.feelsLike = Math.round(currentData.windChill.value);      
+        }
+      } else if (currentData.heatIndex.value != null) {
+        if (temperatureUnit=='fahrenheit') {
+          Weather.feelsLike = Math.round(tempCtoF(currentData.heatIndex.value));
+        } else {
+          Weather.feelsLike = Math.round(currentData.heatIndex.value);      
+        }
+      } else {
+        Weather.feelsLike = Weather.currentTemperature;
+      }
+      break;
     }
-  } else {
-    Weather.currentTemperature='n/a';
-    Weather.dewPoint='n/a';
   }
- 
-  if (currentData.relativeHumidity.value != null) {
-    Weather.humidity = Math.round(currentData.relativeHumidity.value);
+  // Condition where no data was returned in any of the forecast periods.
+  if (i==obsLimit) {
+    Weather.currentTemperature='n/a';
   }
 
   // Gets the weather code object for the code provided by the nws icon or short description.
-  let currConditionObj = getNWSCodeFromIcon(currentData.icon,currentData.textDescription);
+  let currConditionObj;
 
-  // Some reporting stations don't provide  an icon or textDescription for every reporting period.
-  // If the code comes back as unknown xxx, try getting the code from a prior reporting period instead.
-  if (currConditionObj.code=='xxx') {
-    for (let i=1; i<24; i++) {
-      const obsPeriod=rootData.features[i].properties;
-      currConditionObj = getNWSCodeFromIcon(obsPeriod.icon,obsPeriod.textDescription);
-      if (currConditionObj.code != 'xxx') {break;}
-    }
+  for (i=0; i<obsLimit; i++) {
+    currentData=rootData.features[i].properties;
+    currConditionObj = getNWSCodeFromDesc(currentData.textDescription);
+    if (currConditionObj.code != 'xxx') {break;}
   }
 
   // Determine whether to use the day or night text and icon codes based on the time of day.
@@ -289,61 +312,70 @@ async function fetchWeatherCurrent() {
   }
 
   // Winds
-  if (currentData.windSpeed.value != null) {
-    if (windSpeedUnit=='mph') {
-      Weather.windSpeed = `${windNumToCardinal(currentData.windDirection.value)} ${Math.round(KMtoMiles(currentData.windSpeed.value))} ${windSpeedUnit}`;  
-      Weather.gusts = Math.round(KMtoMiles(currentData.windGust.value));
-    } else {
-      Weather.windSpeed = `${windNumToCardinal(currentData.windDirection.value)} ${Math.round(currentData.windSpeed.value)} ${windSpeedUnit}`;  
-      Weather.gusts = Math.round(KMtoMiles(currentData.windGust.value));
+  for (i=0; i<obsLimit; i++) {
+    currentData=rootData.features[i].properties;
+    if (currentData.windSpeed.value != null) {
+      if (windSpeedUnit=='mph') {
+        Weather.windSpeed = `${windNumToCardinal(currentData.windDirection.value)} ${Math.round(KMtoMiles(currentData.windSpeed.value))} ${windSpeedUnit}`;  
+        Weather.gusts = Math.round(KMtoMiles(currentData.windGust.value));
+      } else {
+        Weather.windSpeed = `${windNumToCardinal(currentData.windDirection.value)} ${Math.round(currentData.windSpeed.value)} ${windSpeedUnit}`;  
+        Weather.gusts = Math.round(KMtoMiles(currentData.windGust.value));
+      }
+      break;
     }
-  } else {
+  }
+  // Condition where no data was returned in any of the forecast periods.
+  if (i==obsLimit) {
     Weather.windSpeed='n/a';
     Weather.gusts='n/a';
   }
 
-  // Feels like temperature if available.
-  if (currentData.windChill.value != null) {
-    if (temperatureUnit=='fahrenheit') {
-      Weather.feelsLike = Math.round(tempCtoF(currentData.windChill.value));
-    } else {
-      Weather.feelsLike = Math.round(currentData.windChill.value);      
-    }
-  } else if (currentData.heatIndex.value != null) {
-    if (temperatureUnit=='fahrenheit') {
-      Weather.feelsLike = Math.round(tempCtoF(currentData.heatIndex.value));
-    } else {
-      Weather.feelsLike = Math.round(currentData.heatIndex.value);      
-    }
-  } else {
-    Weather.feelsLike = Weather.currentTemperature;
-  }
-
   // Visibility (comes in as meters)
-  if (currentData.visibility.value != null) {
-    if (windSpeedUnit=='mph') {
-      // Converting from meters to miles
-      Weather.visibility = Math.round(KMtoMiles(currentData.visibility.value/1000));
-    } else {
-      // Converting from meters to kilometers
-      Weather.visibility = Math.round(currentData.visibility.value/1000);
+  for (i=0; i<obsLimit; i++) {
+    currentData=rootData.features[i].properties;
+    if (currentData.visibility.value != null) {
+      if (windSpeedUnit=='mph') {
+        // Converting from meters to miles
+        Weather.visibility = Math.round(KMtoMiles(currentData.visibility.value/1000));
+      } else {
+        // Converting from meters to kilometers
+        Weather.visibility = Math.round(currentData.visibility.value/1000);
+      }
+      break;
     }
-  } else {
+
+  } 
+  if (i==obsLimit) {
     Weather.visibility='n/a';
   }
-
 
   // Barometric pressure from current, trend from 3 hours prior to current.
   // For station observations, there may be sea level pressure or current elevation pressure.
   // Values are in Pascals. Convert to InHg if temperatureUnit=='fahrenheit', otherwise convert to hPa.
   let curBaroPressure=0;
   let histBaroPressure=0;
-  if (currentData.seaLevelPressure.value != null) {
-    curBaroPressure=currentData.seaLevelPressure.value/100;
-    histBaroPressure=rootData.features[23].properties.seaLevelPressure.value/100;
-  } else if (currentData.barometricPressure.value != null) {
-    curBaroPressure=currentData.barometricPressure.value/100;
-    histBaroPressure=rootData.features[23].properties.barometricPressure.value/100;
+  for (i=0; i<obsLimit; i++) {
+    currentData=rootData.features[i].properties;
+    if (currentData.seaLevelPressure.value != null) {
+      curBaroPressure=currentData.seaLevelPressure.value/100;
+    } else if (currentData.barometricPressure.value != null) {
+      curBaroPressure=currentData.barometricPressure.value/100;
+    }
+    break;
+  }
+  // If there is a valid current barometric pressure, try to find a corresponding value from an earlier period.
+  if (curBaroPressure>0) {
+    for (let j=obsLimit; j>i; j--) {
+      // Look backwards from the earliest period back towards the current valid observation.
+      currentData=rootData.features[j-1].properties;
+      if (currentData.seaLevelPressure.value != null) {
+        histBaroPressure=currentData.seaLevelPressure.value/100;
+      } else if (currentData.barometricPressure.value != null) {
+        histBaroPressure=currentData.barometricPressure.value/100;
+      }
+      break;
+    }
   }
   if (curBaroPressure>0) {
     if (temperatureUnit=='fahrenheit') {
@@ -395,7 +427,7 @@ async function fetchWeatherForecast() {
   for (let i = dayNightBias; i <= 3; i++) {
     
     // Gets the weather code object for the code provided by the nws icon or short description.
-    const currConditionObj = getNWSCodeFromIcon(forecastData[i-dayNightBias].icon,forecastData[i-dayNightBias].shortForecast);
+    const currConditionObj = getNWSCodeFromDesc(forecastData[i-dayNightBias].shortForecast);
     if (i==0 || i==2) {
       // Day Period
       Weather.forecastIcon[i] = currConditionObj.DayIcon;
@@ -492,7 +524,7 @@ async function fetchWeatherForecast() {
 
     // Condition and icon come from the day period.
     // Gets the weather code object for the code provided by the nws icon or short description.
-    const currConditionObj = getNWSCodeFromIcon(forecastData[(i*2)+dayNightBias].icon,forecastData[(i*2)+dayNightBias].shortForecast);
+    const currConditionObj = getNWSCodeFromDesc(forecastData[(i*2)+dayNightBias].shortForecast);
     const activePhrase = forecastData[(i*2)+dayNightBias].shortForecast;
     // Split phrases on 2 lines to fit inside the boxes.
     const formattedCondition = activePhrase.split(' ').join('<br/>');
